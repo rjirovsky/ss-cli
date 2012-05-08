@@ -18,6 +18,7 @@
 */
 #include "item.h"
 #include "list"
+#include <stdexcept>
 
 #ifndef DATABASE_H
 #define DATABASE_H
@@ -28,10 +29,11 @@ class Database
 {
 
 public:
-    Database(const string& dbFile, const string& key);
+    Database(const string& path, const string& key);
     void insertItem(Item* item);
     void deleteItem(Item* item);
 
+    void parseDatabaseFile(fstream& dbFile) throw(logic_error);
     
     Item* getItemByName(const string& name);
     list<Item*> getAllItems(){return items;}
@@ -43,7 +45,10 @@ public:
     
 private:
     list<Item*> items;
-    string key;
+    string m_key;
+    string m_hash;
+    string m_path;
+    const string HEADER;
 };
 
 #endif // DATABASE_H

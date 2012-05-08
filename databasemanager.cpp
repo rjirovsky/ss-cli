@@ -28,8 +28,14 @@ DatabaseManager::DatabaseManager()
 {
 }
 
-void DatabaseManager::openDatabase(const string& dbFile, const string& key){
+void DatabaseManager::loadDatabase(const string& dbFile, const string& key) throw(logic_error){
+    
+    try{
     db = new Database(dbFile, key);
+    
+    } catch (logic_error& ex){
+        throw;
+    }
     this->key = key; 
 }
 

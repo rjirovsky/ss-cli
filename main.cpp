@@ -31,32 +31,30 @@ using namespace std;
 int main(int argc, char **argv)
 {
     DatabaseManager dbm;
-    
+    dbm.loadDatabase("default.db","klic");
 
-    dbm.openDatabase("soubor","klic");
-
-    dbm.addItem("skupina", "nazev", "login", "heslo");  //throws invalid_argument
-    dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
-    dbm.addItem("skupina2", "nazev2", "login2", "heslo2");
-    dbm.addItem("skupina2", "nazev5", "login2", "heslo2");
-    dbm.addItem("skupina3", "nazev3", "login3", "heslo3");
-    dbm.addItem("skupina4", "nazev4", "login4", "heslo4");
+//     dbm.addItem("skupina", "nazev", "login", "heslo");  //throws invalid_argument
+//     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
+//     dbm.addItem("skupina2", "nazev2", "login2", "heslo2");
+//     dbm.addItem("skupina2", "nazev5", "login2", "heslo2");
+//     dbm.addItem("skupina3", "nazev3", "login3", "heslo3");
+//     dbm.addItem("skupina4", "nazev4", "login4", "heslo4");
 
 //     dbm.addItem("", "nazev2", "login2", "heslo2");
 //     cout << "All:" << endl;
-     dbm.printAllItems();
+//      dbm.printAllItems();
 //     cout << "All with pass.:" << endl;
 //     dbm.printAllItemsWithSecrets();
 //     cout << "Search by name:" << endl;
 //     dbm.printItemsByName("2");
 //     cout << "Search by group:" << endl;
 //     dbm.printItemsByGroup("default");
-     cout << "Removing" << endl;
-     dbm.removeItem("nazev");
-     dbm.printAllItems();
-     
-     dbm.editItem("banka","nazev5","","1234");
-     dbm.printAllItemsWithSecrets();
+//      cout << "Removing" << endl;
+//      dbm.removeItem("nazev");
+//      dbm.printAllItems();
+//      
+//      dbm.editItem("banka","nazev5","","1234");
+      dbm.printAllItemsWithSecrets();
     cout << "End." << endl;
     return 0;
 }

@@ -41,7 +41,7 @@ public:
      * 
      * @throw   logic_error error with message
      */
-    void openDatabase(const string& dbFile, const string& key);
+    void loadDatabase(const string& dbFile, const string& key) throw(logic_error);
     void saveDatabase();
     
     /**

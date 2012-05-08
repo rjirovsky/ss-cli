@@ -19,11 +19,64 @@
 
 
 #include "database.h"
+#include "item.h"
+#include <fstream>
 
-Database::Database(const string& dbFile, const string& key)
+#include <sstream>
+
+Database::Database(const string& path, const string& key):m_path(path),m_key(key)
 {
     
+    fstream dbFile(m_path.c_str());
+    
+    parseDatabaseFile(dbFile);
+    
+
 }
+
+void Database::parseDatabaseFile(fstream& dbFile) throw(logic_error)
+{
+    const string HEADER = "SAFE_STORAGE";
+    
+    stringstream line;
+    string in;
+    string header;
+    string group, name, login, password;
+    
+    if (dbFile.is_open())
+    {
+        if (dbFile.good()){
+            getline (dbFile,header);
+            if (header != HEADER){
+                throw logic_error("Invalid database header!");
+            }
+        }
+        if (dbFile.good()){
+            getline (dbFile,m_hash);
+        }
+        if (dbFile.good()){ //params line
+            getline (dbFile,in);
+        }
+        while ( dbFile.good() )
+        {
+            getline (dbFile,in);
+            line.str(in);
+            line >> group;
+            line >> name;
+            line >> login;
+            line >> password;
+            line.clear();
+            
+            Item* item = new Item(group,name,login,password);
+            
+            insertItem(item);
+        }
+        dbFile.close();
+    } else {
+        throw invalid_argument("Cannot read database file!");
+    }
+}
+
 
 Item* Database::getItemByName(const string& name)
 {
