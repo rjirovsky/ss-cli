@@ -26,17 +26,30 @@ using namespace std;
 
 DatabaseManager::DatabaseManager()
 {
+    db = new Database();
 }
 
 void DatabaseManager::loadDatabase(const string& dbFile, const string& key) throw(logic_error){
     
     try{
-    db = new Database(dbFile, key);
+    
+    db->openDatabase(dbFile, key);
     
     } catch (logic_error& ex){
         throw;
     }
     this->key = key; 
+}
+
+void DatabaseManager::createDatabase(const string& dbFile, const string& key) throw(exception)
+{
+    try{
+        
+        db->createDatabase(dbFile, key);
+        
+    } catch (exception& ex){
+        throw;
+    }
 }
 
 void DatabaseManager::saveDatabase()

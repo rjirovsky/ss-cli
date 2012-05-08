@@ -44,6 +44,8 @@ public:
     void loadDatabase(const string& dbFile, const string& key) throw(logic_error);
     void saveDatabase();
     
+    void createDatabase(const string& dbFile, const string& key) throw(exception);
+    
     /**
      * @brief   Add new entry to database.
      * 

@@ -24,19 +24,54 @@
 
 #include <sstream>
 
-Database::Database(const string& path, const string& key):m_path(path),m_key(key)
+const string Database::HEADER = "SAFE_STORAGE";
+
+Database::Database()
 {
     
-    fstream dbFile(m_path.c_str());
+}
+
+
+void Database::openDatabase(const string& path, const string& key) throw(exception)
+{
+    m_path = path;
+    m_key = key;
+    fstream dbFile;
     
-    parseDatabaseFile(dbFile);
+    try{
     
+        dbFile.open(m_path.c_str(),  fstream::in | fstream::out);
+        parseDatabaseFile(dbFile);
+    
+    } catch (exception& ex){
+        throw;
+    }
+    dbFile.close();
 
 }
 
+void Database::createDatabase(const string& path, const string& key) throw(exception)
+{
+
+    ofstream dbFile;
+    try{
+        dbFile.open(path.c_str(), fstream::out);
+        dbFile << HEADER << endl;
+        
+        //dbFile << m_hash;
+        dbFile << "group name login password";
+        
+        dbFile.close();
+    } catch (ofstream::failure ex){
+        //cerr << "Problem with creating file: " << ex.what() << endl;
+        throw;
+    }
+}
+
+
 void Database::parseDatabaseFile(fstream& dbFile) throw(logic_error)
 {
-    const string HEADER = "SAFE_STORAGE";
+    
     
     stringstream line;
     string in;

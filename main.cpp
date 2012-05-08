@@ -31,8 +31,8 @@ using namespace std;
 int main(int argc, char **argv)
 {
     DatabaseManager dbm;
-    dbm.loadDatabase("default.db","klic");
-
+//    dbm.loadDatabase("default.db","klic");
+    dbm.createDatabase("new.db","klic");
 //     dbm.addItem("skupina", "nazev", "login", "heslo");  //throws invalid_argument
 //     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
 //     dbm.addItem("skupina2", "nazev2", "login2", "heslo2");

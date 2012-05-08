@@ -29,7 +29,9 @@ class Database
 {
 
 public:
-    Database(const string& path, const string& key);
+    Database();
+    void openDatabase(const string& path, const string& key) throw(exception);
+    void createDatabase(const string& path, const string& key)  throw(exception);
     void insertItem(Item* item);
     void deleteItem(Item* item);
 
@@ -48,7 +50,7 @@ private:
     string m_key;
     string m_hash;
     string m_path;
-    const string HEADER;
+    const static string HEADER;
 };
 
 #endif // DATABASE_H
