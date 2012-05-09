@@ -36,12 +36,12 @@ public:
     /**
      * @brief   Open database file and verify key. 
      * 
-     * @param   dbFile      path to db file
+     * @param   path      path to db file
      * @param   key         master key to cypher
      * 
      * @throw   logic_error error with message
      */
-    void loadDatabase(const string& dbFile, const string& key) throw(logic_error);
+    void loadDatabase(const string& path, const string& key) throw(exception);
     void closeDatabase();
     
     /**

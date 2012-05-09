@@ -31,9 +31,37 @@ using namespace std;
 int main(int argc, char **argv)
 {
     DatabaseManager dbm;
-//    dbm.loadDatabase("default.db","klic");
-//    dbm.createDatabase("new.db","klic");
-    dbm.loadDatabase("new.db","klic"); 
+    
+    if (argc < 3){
+        cout << "Safe Storage (ss-cli) - password database" << endl;
+        cout << "Usage: ss-cli [OPTION]" << endl;
+        cout << "Options:" << endl;
+        cout << "   no options - this help" << endl;
+        cout << "   -n FILE_NAME - create new database file" << endl;
+        cout << "   -f FILE_NAME [ARGS]- work with existing database" << endl;
+        cout << "   Args:" << endl;
+        cout << "      no args - list all entries (without secrets)" << endl;
+        
+        return 1;
+        
+    } else if(argc = 3){
+        if(string(argv[1]) == "-f"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.printAllItems();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else if (string(argv[1]) == "-n"){
+            try {
+                dbm.createDatabase(argv[2],"klic");
+            } catch (exception& ex){
+                cerr << "Error creating database: " << ex.what() << endl;
+            }
+        }
+    }
+      
 
 //      dbm.addItem("", "is_mu", "xjirovsk", "heslo");
 //     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
@@ -56,11 +84,11 @@ int main(int argc, char **argv)
 //      dbm.printAllItems();
 //      
 //       dbm.editItem("banka","nazev5","","1234");
-       dbm.printAllItemsWithSecrets();
+       
      
-     dbm.saveDatabase();
-      dbm.closeDatabase();
+//      dbm.saveDatabase();
+      
      
-    cout << "End." << endl;
+
     return 0;
 }

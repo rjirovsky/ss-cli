@@ -30,7 +30,7 @@ DatabaseManager::DatabaseManager()
     
 }
 
-void DatabaseManager::loadDatabase(const string& path, const string& key) throw(logic_error){
+void DatabaseManager::loadDatabase(const string& path, const string& key) throw(exception){
     
     m_db = new Database();
     m_key = key;
@@ -91,7 +91,7 @@ void DatabaseManager::createDatabase(const string& path, const string& key) thro
         
         dbFile << m_hash << endl;   // hash must be computed here
         
-        dbFile << Database::CAPTION;
+        dbFile << Database::CAPTION << endl;
         
         dbFile.close();
     } else {
@@ -120,7 +120,7 @@ void DatabaseManager::saveDatabase()
         {              
             dbFile << Database::HEADER << endl;            
             dbFile << m_hash << endl; //temporary
-            dbFile << "group name login password" << endl;
+            dbFile << Database::CAPTION << endl;
             
             list<Item*> items = m_db->getAllItems();
             
@@ -219,7 +219,7 @@ void DatabaseManager::printItemByName(const string& name) const
 
 void DatabaseManager::printAllItems() const
 {
-    cout << "Entries for database in " << m_db->getPath() << ":" << endl;
+    cout << "Entries for database in " << m_path << ":" << endl;
     cout << "Name " << "(group)" << endl; 
     
     list<Item*> itemsList = m_db->getAllItems();
