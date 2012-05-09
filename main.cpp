@@ -32,10 +32,10 @@ int main(int argc, char **argv)
 {
     DatabaseManager dbm;
 //    dbm.loadDatabase("default.db","klic");
-    dbm.createDatabase("new.db","klic");
+//    dbm.createDatabase("new.db","klic");
     dbm.loadDatabase("new.db","klic"); 
 
-     dbm.addItem("", "is_mu", "xjirovsk", "heslo");  //throws invalid_argument
+//      dbm.addItem("", "is_mu", "xjirovsk", "heslo");
 //     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
 //     dbm.addItem("skupina2", "nazev2", "login2", "heslo2");
 //     dbm.addItem("skupina2", "nazev5", "login2", "heslo2");
@@ -47,19 +47,20 @@ int main(int argc, char **argv)
 //      dbm.printAllItems();
 //     cout << "All with pass.:" << endl;
 //     dbm.printAllItemsWithSecrets();
-//     cout << "Search by name:" << endl;
-//     dbm.printItemsByName("2");
+//      cout << "Search by name:" << endl;
+//      dbm.printItemsByName("na");
 //     cout << "Search by group:" << endl;
 //     dbm.printItemsByGroup("default");
 //      cout << "Removing" << endl;
-//      dbm.removeItem("nazev");
-     dbm.printAllItems();
+//       dbm.removeItem("nazev1");
+//      dbm.printAllItems();
 //      
-//      dbm.editItem("banka","nazev5","","1234");
-//       dbm.printAllItemsWithSecrets();
+//       dbm.editItem("banka","nazev5","","1234");
+       dbm.printAllItemsWithSecrets();
      
      dbm.saveDatabase();
-     dbm.closeDatabase();
+      dbm.closeDatabase();
+     
     cout << "End." << endl;
     return 0;
 }

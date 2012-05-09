@@ -26,128 +26,11 @@
 #include <fcntl.h>
 
 const string Database::HEADER = "SAFE_STORAGE";
+const string Database::CAPTION = "group name login password";
 
 Database::Database()
 {
-    opened = false;
-    modified = false;   
-}
 
-void Database::openDatabase(const string& path, const string& key) throw(exception)
-{      
-    if (isOpened()){
-        throw logic_error("Another database already opened!");
-    }
-    
-    m_path = path;
-    m_key = key;
-          
-    parseDatabaseFile(path);        
-    
-    opened = true;
-}
-
-void Database::parseDatabaseFile(const string& path) throw(exception)
-{   
-    
-    stringstream line;
-    string in;
-    string header;
-    string group, name, login, password;
-    
-    ifstream dbFile;
-    dbFile.open(m_path.c_str(),  fstream::in);
-    
-    if (dbFile.is_open())
-    {
-        if (dbFile.good()){
-            getline (dbFile,header);
-            if (header != HEADER){
-                throw runtime_error("Invalid database header!");
-            }
-        }
-        if (dbFile.good()){
-            getline (dbFile,m_hash);
-        }
-        if (dbFile.good()){ //params line
-            getline (dbFile,in);
-        }
-        while ( dbFile.good() )
-        {
-            getline (dbFile,in);
-            line.str(in);
-            line >> group;
-            line >> name;
-            line >> login;
-            line >> password;
-            line.clear();
-            
-            Item* item = new Item(group,name,login,password);
-            
-            insertItem(item);
-        }
-        dbFile.close();
-        
-    } else {
-        throw ifstream::failure("Cannot read database file!");
-    }
-}
-
-void Database::closeDatabase()
-{
-    opened = false;
-    modified = false;
-    items.clear();
-    m_key.clear();
-    m_hash.clear();
-    m_path.clear();
-}
-
-void Database::saveDatabase()throw(exception)
-{
-    if (isOpened()){
-        ofstream dbFile;
-        try{
-            dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc);
-            dbFile << HEADER << endl;
-            
-            dbFile << "HASH"; //temporary
-            
-            dbFile << "group name login password";
-            
-            for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-                dbFile << (**iterator).getGroup() << (**iterator).getName() << (**iterator).getLogin() 
-                << (**iterator).getPassword() << endl;        
-            }
-            
-            dbFile.close();
-        } catch (ofstream::failure ex){
-            throw;
-        }
-        
-        modified = false;
-    } else {
-        throw logic_error("Database is NOT opened!");
-    }
-}
-
-void Database::createDatabase(const string& path, const string& key) throw(exception)
-{
-    ofstream dbFile;
-    dbFile.open(path.c_str(), ofstream::out);
-    
-    if (dbFile.is_open())
-    {
-        dbFile << HEADER << endl;
-        
-        dbFile << "HASH";   //temporary
-        
-        dbFile << "group name login password";
-        
-        dbFile.close();
-    } else {
-        throw ofstream::failure("Cannot write database file! Check your premissions.");
-    }
 }
 
 Item* Database::getItemByName(const string& name)
@@ -170,7 +53,7 @@ void Database::insertItem(Item* item)
 
 void Database::deleteItem(Item* item)
 {
-    items.remove(item); 
+    items.remove(item);
     modified = true;
 }
 
@@ -186,6 +69,9 @@ string Database::decrypt(string str)
 
 Database::~Database()
 {
-
+    for (list<Item*>::iterator it = items.begin(); it != items.end(); ++it) {        
+        delete *it;
+    }
+    items.clear();
 }
 

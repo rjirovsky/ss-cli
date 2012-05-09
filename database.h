@@ -34,46 +34,8 @@ class Database
 {
 
 public:
-    
-    /**
-     * @brief Initialize database, reset opened and modified flags to false. 
-     */
+
     Database();
-    
-    /**
-     * @brief Try to open database in path with given key.
-     * 
-     * @param   path    db file location
-     * @param   key     secret key to encrypt and decrypt secrets
-     * 
-     * @throw   exception   if database already opened; on IO error; on invalid db header
-     */
-    void openDatabase(const string& path, const string& key) throw(exception);
-    
-    /**
-     * @brief   Close active database and reset all attributes.
-     * 
-     * After executing closeDatabase(), Database is ready to open another file.
-     */
-    void closeDatabase();
-    
-    /**
-     * @brief   Save changes in active database to file.
-     * 
-     * @throw   exception   if no database opened or IO error
-     */
-    void saveDatabase()throw(exception);
-    
-    /**
-     * @brief   Create new database file on path with given key.
-     * After creation, database file is NOT opened!
-     * 
-     * @param   path    db file location
-     * @param   key     secret key to encrypt and decrypt secrets
-     * 
-     * @throw   exception   on IO error
-     */
-    void createDatabase(const string& path, const string& key)  throw(exception);
     
     /**
      * @brief   Insert Item to database.
@@ -102,12 +64,6 @@ public:
      */
     string getPath() const {return m_path;}
     
-    /**
-     * @brief   Get Database::opened flag 
-     * 
-     * @return  true if any db loaded to memory, false othewise
-     */
-    bool isOpened()const{return opened;}
     
     /**
      * @brief   Get Database::modified flag 
@@ -155,15 +111,18 @@ public:
      */
     string decrypt(string str);
     
+    /**
+     * @brief   Free all alocated memory.
+     */
     virtual ~Database();
     
+    const static string HEADER; ///control header of file
+    const static string CAPTION;
 private:
     list<Item*> items;  ///list of Items from database file
     string m_key;       ///key for symetric cypher
     string m_hash;      ///control hash from file
     string m_path;      ///path to database file
-    const static string HEADER; ///control header of file
-    bool opened; 
     bool modified;
 };
 

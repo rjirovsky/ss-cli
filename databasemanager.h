@@ -43,8 +43,23 @@ public:
      */
     void loadDatabase(const string& dbFile, const string& key) throw(logic_error);
     void closeDatabase();
+    
+    /**
+     * @brief   Save changes in active database to file.
+     * 
+     * @throw   exception   if no database opened or IO error
+     */
     void saveDatabase();
     
+    /**
+     * @brief   Create new database file on path with given key.
+     * After creation, database file is NOT opened!
+     * 
+     * @param   path    db file location
+     * @param   key     secret key to encrypt and decrypt secrets
+     * 
+     * @throw   exception   on IO error
+     */
     void createDatabase(const string& dbFile, const string& key) throw(exception);
     
     /**
@@ -112,9 +127,10 @@ public:
     virtual ~DatabaseManager();
 
 private:
-    Database* db;   ///database with entries
-    string key;     ///key to cypher
-    
+    Database* m_db;   ///database with entries
+    string m_key;     ///key to cypher
+    string m_hash;
+    string m_path;
 };
 
 #endif // DATABASEMANAGER_H
