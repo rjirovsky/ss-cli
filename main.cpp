@@ -33,7 +33,9 @@ int main(int argc, char **argv)
     DatabaseManager dbm;
 //    dbm.loadDatabase("default.db","klic");
     dbm.createDatabase("new.db","klic");
-//     dbm.addItem("skupina", "nazev", "login", "heslo");  //throws invalid_argument
+    dbm.loadDatabase("new.db","klic"); 
+
+     dbm.addItem("", "is_mu", "xjirovsk", "heslo");  //throws invalid_argument
 //     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
 //     dbm.addItem("skupina2", "nazev2", "login2", "heslo2");
 //     dbm.addItem("skupina2", "nazev5", "login2", "heslo2");
@@ -51,10 +53,13 @@ int main(int argc, char **argv)
 //     dbm.printItemsByGroup("default");
 //      cout << "Removing" << endl;
 //      dbm.removeItem("nazev");
-//      dbm.printAllItems();
+     dbm.printAllItems();
 //      
 //      dbm.editItem("banka","nazev5","","1234");
-      dbm.printAllItemsWithSecrets();
+//       dbm.printAllItemsWithSecrets();
+     
+     dbm.saveDatabase();
+     dbm.closeDatabase();
     cout << "End." << endl;
     return 0;
 }

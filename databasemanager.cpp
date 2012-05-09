@@ -52,9 +52,16 @@ void DatabaseManager::createDatabase(const string& dbFile, const string& key) th
     }
 }
 
+void DatabaseManager::closeDatabase()
+{
+    db->closeDatabase();
+    key.clear();
+}
+
+
 void DatabaseManager::saveDatabase()
 {
-    //save db to file
+    db->saveDatabase();
 }
 
 
@@ -137,6 +144,9 @@ void DatabaseManager::printItemByName(const string& name) const
 
 void DatabaseManager::printAllItems() const
 {
+    cout << "Entries for database in " << db->getPath() << ":" << endl;
+    cout << "Name " << "(group)" << endl; 
+    
     list<Item*> itemsList = db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
         cout << (**iterator) << endl;        

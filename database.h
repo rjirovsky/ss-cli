@@ -25,32 +25,146 @@
 
 using namespace std;
 
+
+/**
+ * Represents database of credentials loaded from file.
+ * It does encryption and decryption operations.
+ */
 class Database
 {
 
 public:
-    Database();
-    void openDatabase(const string& path, const string& key) throw(exception);
-    void createDatabase(const string& path, const string& key)  throw(exception);
-    void insertItem(Item* item);
-    void deleteItem(Item* item);
-
-    void parseDatabaseFile(fstream& dbFile) throw(logic_error);
     
+    /**
+     * @brief Initialize database, reset opened and modified flags to false. 
+     */
+    Database();
+    
+    /**
+     * @brief Try to open database in path with given key.
+     * 
+     * @param   path    db file location
+     * @param   key     secret key to encrypt and decrypt secrets
+     * 
+     * @throw   exception   if database already opened; on IO error; on invalid db header
+     */
+    void openDatabase(const string& path, const string& key) throw(exception);
+    
+    /**
+     * @brief   Close active database and reset all attributes.
+     * 
+     * After executing closeDatabase(), Database is ready to open another file.
+     */
+    void closeDatabase();
+    
+    /**
+     * @brief   Save changes in active database to file.
+     * 
+     * @throw   exception   if no database opened or IO error
+     */
+    void saveDatabase()throw(exception);
+    
+    /**
+     * @brief   Create new database file on path with given key.
+     * After creation, database file is NOT opened!
+     * 
+     * @param   path    db file location
+     * @param   key     secret key to encrypt and decrypt secrets
+     * 
+     * @throw   exception   on IO error
+     */
+    void createDatabase(const string& path, const string& key)  throw(exception);
+    
+    /**
+     * @brief   Insert Item to database.
+     * It is stored only in memory in container std::list.
+     * To save to disk use saveDatabase().
+     * It set Database::modified flag to true. 
+     * 
+     * @param   item    item to insert
+     */
+    void insertItem(Item* item);
+    
+    /**
+     * @brief   Delete Item from database.
+     * It is deleted only from container std::list.
+     * To save changes to disk use saveDatabase().
+     * It set Database::modified flag to true. 
+     * 
+     * @param   item    item to insert
+     */
+    void deleteItem(Item* item);
+    
+    /**
+     * @brief   Return active database file path.
+     * 
+     * @return  path to database file
+     */
+    string getPath() const {return m_path;}
+    
+    /**
+     * @brief   Get Database::opened flag 
+     * 
+     * @return  true if any db loaded to memory, false othewise
+     */
+    bool isOpened()const{return opened;}
+    
+    /**
+     * @brief   Get Database::modified flag 
+     * 
+     * @return  true if db in memory changed, false othewise
+     */
+    bool isModified()const{return modified;}
+
+    /**
+     * @brief   Parse database file entries to std::list.
+     * 
+     * @param   path    path to db file
+     *
+     * @throw   exception   on invalid database header; on IO error  
+     */
+    void parseDatabaseFile(const string& path) throw(exception);
+    
+    /**
+     * @brief   Find Item with given name.
+     * 
+     * @param   name    exact name to find
+     * 
+     * @return  one Item with given name
+     */
     Item* getItemByName(const string& name);
+    
+    /**
+     * @brief   Get list of all Items
+     * 
+     * @return  std::list of Item pointers 
+     */
     list<Item*> getAllItems(){return items;}
     
+    /**
+     * @brief   Encrypt given string using symetric cypher. Uses m_key.
+     * 
+     * @param   str string to encrypt
+     */
     string encrypt(string str);
+    
+    /**
+     * @brief   Decrypt given string using symetric cypher. Uses m_key.
+     * 
+     * @param   str string to decrypt
+     */
     string decrypt(string str);
     
     virtual ~Database();
     
 private:
-    list<Item*> items;
-    string m_key;
-    string m_hash;
-    string m_path;
-    const static string HEADER;
+    list<Item*> items;  ///list of Items from database file
+    string m_key;       ///key for symetric cypher
+    string m_hash;      ///control hash from file
+    string m_path;      ///path to database file
+    const static string HEADER; ///control header of file
+    bool opened; 
+    bool modified;
 };
 
 #endif // DATABASE_H

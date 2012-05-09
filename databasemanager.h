@@ -42,6 +42,7 @@ public:
      * @throw   logic_error error with message
      */
     void loadDatabase(const string& dbFile, const string& key) throw(logic_error);
+    void closeDatabase();
     void saveDatabase();
     
     void createDatabase(const string& dbFile, const string& key) throw(exception);
@@ -113,6 +114,7 @@ public:
 private:
     Database* db;   ///database with entries
     string key;     ///key to cypher
+    
 };
 
 #endif // DATABASEMANAGER_H
