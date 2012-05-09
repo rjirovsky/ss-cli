@@ -34,7 +34,7 @@ string Item::getPassword() const
 
 ostream& operator <<(ostream& out, const Item& item) {
     
-    out << item.m_name << " (" << item.m_group << ")";
+    out << item.m_name << "(" << item.m_group << ")";
     
     return out;
 }

@@ -24,6 +24,8 @@
 
 using namespace std;
 
+void helpMessage();
+
 /**
  * @brief 
  * 
@@ -32,19 +34,8 @@ int main(int argc, char **argv)
 {
     DatabaseManager dbm;
     
-    if (argc < 3){
-        cout << "Safe Storage (ss-cli) - password database" << endl;
-        cout << "Usage: ss-cli [OPTION]" << endl;
-        cout << "Options:" << endl;
-        cout << "   no options - this help" << endl;
-        cout << "   -n FILE_NAME - create new database file" << endl;
-        cout << "   -f FILE_NAME [ARGS]- work with existing database" << endl;
-        cout << "   Args:" << endl;
-        cout << "      no args - list all entries (without secrets)" << endl;
-        
-        return 1;
-        
-    } else if(argc = 3){
+    if(argc == 3){
+        //cout << "#3" << endl;
         if(string(argv[1]) == "-f"){
             try {
                 dbm.loadDatabase(argv[2],"klic");
@@ -59,7 +50,51 @@ int main(int argc, char **argv)
             } catch (exception& ex){
                 cerr << "Error creating database: " << ex.what() << endl;
             }
+        } 
+    } else if (argc == 4){
+        //cout << "#4" << endl;
+        if(string(argv[3]) == "-L"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.printAllItemsWithSecrets();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else {
+            helpMessage();
         }
+    } else if (argc == 5){
+        //cout << "#5" << endl;
+        if(string(argv[3]) == "-sn"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.printItemsByName(string(argv[4]));
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-sg"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.printItemsByGroup(string(argv[4]));
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-l"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.printItemByName(string(argv[4]));
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else {
+            helpMessage();
+        }
+    } else {
+        helpMessage();
     }
       
 
@@ -91,4 +126,21 @@ int main(int argc, char **argv)
      
 
     return 0;
+}
+
+void helpMessage(){
+    
+    cout << "Safe Storage (ss-cli) - password database" << endl;
+    cout << "Usage: ss-cli [OPTION]" << endl;
+    cout << "Options:" << endl;
+    cout << "   no options - this help" << endl;
+    cout << "   -n FILE_NAME - create new database file" << endl;
+    cout << "   -f FILE_NAME [ARGS]- work with existing database" << endl;
+    cout << "   Args:" << endl;
+    cout << "      no args - list all entries (without secrets)" << endl;
+    cout << "      -L - list all entries with login and password (be carefull!)" << endl;
+    cout << "      -l NAME - show complete entry with NAME (with secrets)" << endl;
+    cout << "      -sn KEYWORD - search for entries containing KEYWORD in name" << endl;
+    cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl;
+    
 }
