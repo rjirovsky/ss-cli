@@ -76,7 +76,7 @@ public:
      * 
      * @throw   invalid_argument    if name or password is empty or name is already in db
      */
-    void addItem(string group, const string& name, string login, const string& password) throw(invalid_argument);
+    void addItem(Item * item) throw(invalid_argument);
     
     /**
      * @brief   Remove entry with given name from database.
@@ -97,7 +97,7 @@ public:
      * 
      * @throw   invalid_argument    if name or password is empty or name is NOT in database
      */
-    void editItem(string group, const string& name, string login, const string& password) throw(invalid_argument);
+    void editItem(Item * item) throw(invalid_argument);
     
     /**
      * @brief  Search for substring in group attribute of each entry. Can print more than one entries. 
@@ -129,6 +129,7 @@ public:
     void printAllItemsWithSecrets() const;
 
     virtual ~DatabaseManager();
+    
 
 private:
     Database* m_db;   ///database with entries
@@ -136,5 +137,7 @@ private:
     string m_hash;
     string m_path;
 };
+
+
 
 #endif // DATABASEMANAGER_H

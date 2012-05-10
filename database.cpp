@@ -19,7 +19,6 @@
 
 
 #include "database.h"
-#include "item.h"
 #include <fstream>
 
 #include <sstream>
@@ -37,7 +36,7 @@ Item* Database::getItemByName(const string& name)
 {
     Item* item = NULL;
     for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-        if ((*iterator)->getName() == name){
+        if ((*iterator)->name == name){
             item = *iterator;
             break;
         }
@@ -75,3 +74,9 @@ Database::~Database()
     items.clear();
 }
 
+ostream& operator <<(ostream& out, const Item& item) {
+    
+    out << item.name << "(" << item.group << ")";
+    
+    return out;
+}

@@ -25,6 +25,7 @@
 using namespace std;
 
 void helpMessage();
+Item* fillItem(string name);
 
 /**
  * @brief 
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
                 dbm.exportDatabase(string(argv[4]));
                 dbm.closeDatabase();
             } catch (exception& ex){
-                cerr << "Error loading database: " << ex.what() << endl;
+                cerr << "Export error: " << ex.what() << endl;
             }
         } else if(string(argv[3]) == "-I"){
             try {
@@ -106,7 +107,26 @@ int main(int argc, char **argv)
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
-                cerr << "Error loading database: " << ex.what() << endl;
+                cerr << "Import error: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-rm"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.removeItem(argv[4]);
+                dbm.saveDatabase();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error removing entry: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-a"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                Item * item = fillItem(argv[4]);
+                dbm.addItem(item);
+                dbm.saveDatabase();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error inserting entry: " << ex.what() << endl;
             }
         } else {
             helpMessage();
@@ -114,14 +134,7 @@ int main(int argc, char **argv)
     } else {
         helpMessage();
     }
-      
 
-//      dbm.addItem("", "is_mu", "xjirovsk", "heslo");
-//     dbm.addItem("skupina1", "nazev1", "login1", "heslo1");
-//     dbm.addItem("skupina2", "nazev2", "login2", "heslo2");
-//     dbm.addItem("skupina2", "nazev5", "login2", "heslo2");
-//     dbm.addItem("skupina3", "nazev3", "login3", "heslo3");
-//     dbm.addItem("skupina4", "nazev4", "login4", "heslo4");
 
 //     dbm.addItem("", "nazev2", "login2", "heslo2");
 //     cout << "All:" << endl;
@@ -134,7 +147,7 @@ int main(int argc, char **argv)
 //     dbm.printItemsByGroup("default");
 //      cout << "Removing" << endl;
 //       dbm.removeItem("nazev1");
-//      dbm.printAllItems();
+
 //      
 //       dbm.editItem("banka","nazev5","","1234");
        
@@ -144,6 +157,10 @@ int main(int argc, char **argv)
      
 
     return 0;
+}
+
+Item* fillItem(string name){
+    
 }
 
 void helpMessage(){

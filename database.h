@@ -16,7 +16,7 @@
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
-#include "item.h"
+
 #include "list"
 #include <stdexcept>
 
@@ -25,6 +25,17 @@
 
 using namespace std;
 
+/**
+ * @brief Stricture for saving user input.
+ */
+struct Item {
+    string group;
+    string name;
+    string login;
+    string password;
+    
+    friend ostream& operator <<(ostream& out, const Item& item);
+};
 
 /**
  * Represents database of credentials loaded from file.
@@ -125,5 +136,7 @@ private:
     string m_path;      ///path to database file
     bool modified;
 };
+
+
 
 #endif // DATABASE_H

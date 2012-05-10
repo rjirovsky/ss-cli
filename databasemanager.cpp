@@ -23,7 +23,7 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
-#include "item.h"
+
 
 using namespace std;
 
@@ -38,8 +38,8 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
     m_key = key;
     m_path = path;
     
-    stringstream line;    
-    string header, in, group, name, login, password;
+    stringstream line;
+    string header, in;
     ifstream dbFile;
     
     dbFile.open(m_path.c_str(),  ifstream::in);
@@ -66,20 +66,19 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
             
             if (!in.empty()){   //skip empty lines
                 //parse line
+                Item* item = new Item();
                 line << in;
                 getline (line,in,';');
-                group = string(in, 0, in.length());
+                item->group = string(in, 0, in.length());
                 
                 getline (line,in,';');
-                name = string (in, 0, in.length());
+                item->name = string (in, 0, in.length());
                 
                 getline (line,in,';');
-                login = string(in, 0, in.length());
+                item->login = string(in, 0, in.length());
                 
                 getline (line,in,';');
-                password = string(in, 0, in.length());
-                
-                Item* item = new Item(group,name,login,password);
+                item->password = string(in, 0, in.length());
                 
                 m_db->insertItem(item); //insert to db
             }
@@ -137,8 +136,8 @@ void DatabaseManager::saveDatabase()
             list<Item*> items = m_db->getAllItems();
             
             for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-                dbFile << (**iterator).getGroup() << ";" << (**iterator).getName() << ";" << (**iterator).getLogin() << ";" 
-                << (**iterator).getPassword() << ";" << endl;        
+                dbFile << (**iterator).group << ";" << (**iterator).name << ";" << (**iterator).login << ";" 
+                << (**iterator).password << ";" << endl;        
             }
             
             dbFile.close();
@@ -164,9 +163,9 @@ void DatabaseManager::exportDatabase(const string& out) throw(exception)
             list<Item*> items = m_db->getAllItems();
             
             for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-                outFile << (**iterator).getGroup() << ";" << (**iterator).getName() << ";" 
-                        << m_db->decrypt((**iterator).getLogin()) << ";" 
-                        << m_db->decrypt((**iterator).getPassword()) << ";" << endl;        
+                outFile << (**iterator).group << ";" << (**iterator).name << ";" 
+                        << m_db->decrypt((**iterator).login) << ";" 
+                        << m_db->decrypt((**iterator).password) << ";" << endl;        
             }
             
             outFile.close();
@@ -182,7 +181,7 @@ void DatabaseManager::exportDatabase(const string& out) throw(exception)
 void DatabaseManager::importCSV(const string& input) throw(exception)
 {
     stringstream line;    
-    string header, in, group, name, login, password;
+    string header, in;
     ifstream csvFile;
     int counter = 0;
     
@@ -202,25 +201,26 @@ void DatabaseManager::importCSV(const string& input) throw(exception)
             getline (csvFile,in);    //read one line from file
             
             if (!in.empty()){   //skip empty lines
-                //parse line
+                Item* item = new Item();
                 line << in;
                 getline (line,in,';');
-                group = string(in, 0, in.length());
+                item->group = string(in, 0, in.length());
                 
                 getline (line,in,';');
-                name = string (in, 0, in.length());
+                item->name = string (in, 0, in.length());
                 
                 getline (line,in,';');
-                login = string(in, 0, in.length());
+                item->login = string(in, 0, in.length());
                 
                 getline (line,in,';');
-                password = string(in, 0, in.length());
+                item->password = string(in, 0, in.length());
  
                 try {
-                    addItem(group, name, login, password);
+                    addItem(item);
                     counter++;
                 } catch (invalid_argument& ex){
                     cerr << ex.what() << endl;
+                    delete item;
                     continue;
                 }
             }
@@ -235,21 +235,22 @@ void DatabaseManager::importCSV(const string& input) throw(exception)
 
 
 
-void DatabaseManager::addItem(string group, const string& name, string login, const string& password) throw(invalid_argument) {
+void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
   
-    if (group.empty()) group = "default"; 
-    if (login.empty()) login = "none";
+    if (item->group.empty()) item->group = "default"; 
+    if (item->login.empty()) item->login = "none";
     
     
-    if (name.empty() || password.empty()){
+    if (item->name.empty() || item->password.empty()){
         throw invalid_argument("Name and password cannot be empty!");
     }
     
-    if (!m_db->getItemByName(name)){
-        Item* workingItem = new Item(group, name, m_db->encrypt(login), m_db->encrypt(password));
-        m_db->insertItem(workingItem);
+    if (!m_db->getItemByName(item->name)){
+        item->login = m_db->encrypt(item->login);
+        item->password = m_db->encrypt(item->password);
+        m_db->insertItem(item);
     } else {
-        throw invalid_argument("Such name ( " + name + " ) already in database! Skipping.");
+        throw invalid_argument("Such name ( " + item->name + " ) already in database! Skipping.");
     }
 }
 
@@ -267,22 +268,22 @@ void DatabaseManager::removeItem(const string& name) throw(invalid_argument)
     item = NULL;
 }
 
-void DatabaseManager::editItem(string group, const string& name, string login, const string& password) throw(invalid_argument)
+void DatabaseManager::editItem(Item * item) throw(invalid_argument)
 {
-    if (group.empty()) group = "default"; 
-    if (login.empty()) login = "none";
+    if (item->group.empty()) item->group = "default"; 
+    if (item->login.empty()) item->login = "none";
     
-    if (name.empty() || password.empty()){
+    if (item->name.empty() || item->password.empty()){
         throw invalid_argument("Name and password cannot be empty!");
     }
     
-    Item* item = m_db->getItemByName(name);
-    if (item){
-        item->setGroup(group);
-        item->setLogin(m_db->encrypt(login));
-        item->setPassword(m_db->encrypt(password));
+    Item* dbItem = m_db->getItemByName(item->name);
+    if (dbItem){
+        dbItem->group = item->group;
+        dbItem->login = m_db->encrypt(item->login);
+        dbItem->password = m_db->encrypt(item->password);
     } else
-        throw invalid_argument("Such name ( " + name + " ) not in database!");
+        throw invalid_argument("Such name ( " + item->name + " ) not in database!");
 }
 
 
@@ -298,7 +299,7 @@ void DatabaseManager::printItemsByName(const string& name) const
     bool found = false;
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
-        if ((*iterator)->getName().find(name) != string::npos){
+        if ((*iterator)->name.find(name) != string::npos){
             cout.width(16);
             cout << (**iterator) << endl;
             cout << "------------------------" << endl;
@@ -322,7 +323,7 @@ void DatabaseManager::printItemsByGroup(const string& group) const
     bool found = false;
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
-        if ((*iterator)->getGroup().find(group) != string::npos){
+        if ((*iterator)->group.find(group) != string::npos){
             cout.width(16);
             cout << (**iterator) << endl;
             cout << "------------------------" << endl;
@@ -351,8 +352,8 @@ void DatabaseManager::printItemByName(const string& name) const
         cout.width(16);
         cout << *item << endl;
         cout.width(16);
-        cout << m_db->decrypt(item->getLogin()) 
-        << m_db->decrypt(item->getPassword()) << endl; 
+        cout << m_db->decrypt(item->login) 
+        << m_db->decrypt(item->password) << endl; 
         cout << "------------------------" << endl;
     } else {
         cout << "Name not found!" << endl;
@@ -402,8 +403,8 @@ void DatabaseManager::printAllItemsWithSecrets() const
         cout.width(16);
         cout << (**iterator) << endl;
         cout.width(16);
-        cout << m_db->decrypt((**iterator).getLogin()) 
-             << m_db->decrypt((**iterator).getPassword()) << endl; 
+        cout << m_db->decrypt((**iterator).login) 
+             << m_db->decrypt((**iterator).password) << endl; 
         cout << "------------------------" << endl;
         
         found = true;
