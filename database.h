@@ -19,6 +19,9 @@
 
 #include "list"
 #include <stdexcept>
+#include <sys/mman.h>
+#include <cstdio>
+#include <iostream>
 
 #ifndef DATABASE_H
 #define DATABASE_H
@@ -29,6 +32,24 @@ using namespace std;
  * @brief Stricture for saving user input.
  */
 struct Item {
+    
+    /**
+     * @brief Constructor tries to lock memory.
+     * 
+     * It is locked whole page.
+     */
+    Item(){
+        this->password.reserve(128);
+        this->login.reserve(128);
+        if(mlock(this, sizeof(*this))){  //min. 2*32B characters + 2*128B cypher of pass and login
+            perror("Unable to lock Item in memory!");
+        }
+    }
+    
+    ~Item(){
+         munlock(this, sizeof(*this));
+    }
+    
     string group;
     string name;
     string login;
@@ -38,7 +59,8 @@ struct Item {
 };
 
 /**
- * Represents database of credentials loaded from file.
+ * @brief   Represents database of entries.
+ * Manipulates with items. Stores it in std::list.
  * It does encryption and decryption operations.
  */
 class Database
@@ -76,21 +98,8 @@ public:
     string getPath() const {return m_path;}
     
     
-    /**
-     * @brief   Get Database::modified flag 
-     * 
-     * @return  true if db in memory changed, false othewise
-     */
-    bool isModified()const{return modified;}
 
-    /**
-     * @brief   Parse database file entries to std::list.
-     * 
-     * @param   path    path to db file
-     *
-     * @throw   exception   on invalid database header; on IO error  
-     */
-    void parseDatabaseFile(const string& path) throw(exception);
+
     
     /**
      * @brief   Find Item with given name.
@@ -122,10 +131,14 @@ public:
      */
     string decrypt(string str);
     
+    
     /**
      * @brief   Free all alocated memory.
      */
     virtual ~Database();
+    
+    void sortDatabase();
+    
     
     const static string HEADER; ///control header of file
     const static string CAPTION;
@@ -134,7 +147,6 @@ private:
     string m_key;       ///key for symetric cypher
     string m_hash;      ///control hash from file
     string m_path;      ///path to database file
-    bool modified;
 };
 
 

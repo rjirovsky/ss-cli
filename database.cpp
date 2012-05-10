@@ -27,6 +27,8 @@
 const string Database::HEADER = "SAFE_STORAGE";
 const string Database::CAPTION = "group;name;login;password;";
 
+bool compare(Item* first, Item* second);
+
 Database::Database()
 {
 
@@ -47,14 +49,20 @@ Item* Database::getItemByName(const string& name)
 void Database::insertItem(Item* item)
 {    
     items.push_back(item);
-    modified = true;
 }
 
 void Database::deleteItem(Item* item)
 {
     items.remove(item);
-    modified = true;
 }
+
+
+
+void Database::sortDatabase()
+{
+    items.sort(compare);
+}
+
 
 string Database::encrypt(string str)
 {
@@ -76,7 +84,31 @@ Database::~Database()
 
 ostream& operator <<(ostream& out, const Item& item) {
     
+    //out.setf(ios::left);
     out << item.name << "(" << item.group << ")";
     
     return out;
+}
+
+/**
+ * @brief Compare two Item objects lexicographically.
+ * 
+ * First compares groups, if equal compares names.
+ * 
+ * @param   first
+ * @param   second
+ * @return  true - first is lower (comes first), false - equal or higher
+ */
+bool compare(Item* first, Item* second)
+{
+    if (first->group < second->group){
+        return true;
+    }
+    else if (first->group == second->group){
+        if (first->name < second->name)
+            return true;
+        else 
+            return false;
+    } else
+        return false;      
 }

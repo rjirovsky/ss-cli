@@ -21,10 +21,10 @@
 #include "databasemanager.h"
 #include <iostream>
 #include <fstream>
-#include <ostream>
 #include <sstream>
 
-
+const  string DatabaseManager::SEPARATOR = "--------------------------------"; //32
+const int    DatabaseManager::COL_WIDTH = 24;
 
 using namespace std;
 
@@ -251,7 +251,7 @@ void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
         item->password = m_db->encrypt(item->password);
         m_db->insertItem(item);
     } else {
-        throw invalid_argument("Such name ( " + item->name + " ) already in database! Skipping.");
+        throw invalid_argument("Such name (" + item->name + ") already in database! Skipping.");
     }
 }
 
@@ -262,7 +262,7 @@ void DatabaseManager::removeItem(const string& name) throw(invalid_argument)
     if (item){
         m_db->deleteItem(item);
     } else {
-        throw invalid_argument("No entry with this name ( " + name + " ) in database!");
+        throw invalid_argument("No entry with this name (" + name + ") in database!");
     }
     
     delete item;
@@ -292,24 +292,24 @@ void DatabaseManager::printItemsByName(const string& name) const
 {
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
-    cout << "------------------------" << endl;
+    cout << SEPARATOR << endl;
     
     bool found = false;
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
         if ((*iterator)->name.find(name) != string::npos){
-            cout.width(16);
+            cout.width(COL_WIDTH);
             cout << (**iterator) << endl;
-            cout << "------------------------" << endl;
+            cout << SEPARATOR << endl;
             found = true;
         }
     }
     
     if (!found){
         cout << "No entry!" << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     }
 }
 
@@ -318,24 +318,24 @@ void DatabaseManager::printItemsByGroup(const string& group) const
 {
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
-    cout << "------------------------" << endl; 
+    cout << SEPARATOR << endl; 
     
     bool found = false;
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
         if ((*iterator)->group.find(group) != string::npos){
-            cout.width(16);
+            cout.width(COL_WIDTH);
             cout << (**iterator) << endl;
-            cout << "------------------------" << endl;
+            cout << SEPARATOR << endl;
             
             found = true;
         }
     }
     if (!found){
         cout << "No entry!" << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     }
 }
 
@@ -344,23 +344,23 @@ void DatabaseManager::printItemByName(const string& name) const
 {
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "LOGIN" << "PASSWORD" << endl; 
-    cout << "------------------------" << endl; 
+    cout << SEPARATOR << endl; 
     
     Item* item = m_db->getItemByName(name);
     if (item){
-        cout.width(16);
+        cout.width(COL_WIDTH);
         cout << *item << endl;
-        cout.width(16);
+        cout.width(COL_WIDTH);
         cout << m_db->decrypt(item->login) 
         << m_db->decrypt(item->password) << endl; 
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     } else {
         cout << "Name not found!" << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     }
 }
 
@@ -369,23 +369,23 @@ void DatabaseManager::printAllItems() const
 {
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
-    cout << "------------------------" << endl; 
+    cout << SEPARATOR << endl; 
     
     bool found = false;
     
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
-        cout.width(16);
+        cout.width(COL_WIDTH);
         cout << (**iterator) << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
         
         found = true;
     }
     if (!found){
         cout << "Database is empty!" << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     }
 }
 
@@ -394,28 +394,32 @@ void DatabaseManager::printAllItemsWithSecrets() const
 {
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
-    cout.width(16);
+    cout.width(COL_WIDTH);
     cout << "LOGIN" << "PASSWORD" << endl; 
-    cout << "------------------------" << endl; 
+    cout << SEPARATOR << endl; 
     
     bool found = false;
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
-        cout.width(16);
-        cout << (**iterator) << endl;
-        cout.width(16);
-        cout << m_db->decrypt((**iterator).login) 
-             << m_db->decrypt((**iterator).password) << endl; 
-        cout << "------------------------" << endl;
+        cout.width(COL_WIDTH);
+        //cout << (**iterator) << endl;
+        cout.width(COL_WIDTH);
+        cout << m_db->decrypt((**iterator).login) << m_db->decrypt((**iterator).password) << endl; 
+        cout << SEPARATOR << endl;
         
         found = true;
     }
     if (!found){
         cout << "Database is empty!" << endl;
-        cout << "------------------------" << endl;
+        cout << SEPARATOR << endl;
     }    
+}
+
+void DatabaseManager::sortDatabase()
+{
+   m_db->sortDatabase();
 }
 
 

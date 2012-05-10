@@ -28,6 +28,17 @@
 
 using namespace std;
 
+/**
+ * @brief   Control database operations.
+ * 
+ * This class controls all operations wirh database.
+ * - load entries from file
+ * - create new db file
+ * - save chanfes to db file
+ * - export/import entries from CSV
+ * - Item CRUD operations
+ * - sorting entries
+ */
 class DatabaseManager
 {
 
@@ -43,6 +54,10 @@ public:
      * @throw   logic_error error with message
      */
     void loadDatabase(const string& path, const string& key) throw(exception);
+    
+    /**
+     * @brief Perform manager cleanup.
+     */
     void closeDatabase();
     
     /**
@@ -63,8 +78,25 @@ public:
      */
     void createDatabase(const string& dbFile, const string& key) throw(exception);
     
+    /**
+     * @brief   Export all entries to CSV.
+     * Header:
+     * group;name;login;password;
+     * 
+     * @param   output      path to output file
+     * @throw   exception   on no active database, on IO error
+     */
     void exportDatabase(const string& output) throw(exception);
     
+    
+    /**
+     * @brief   Import all entries from CSV.
+     * Header:
+     * group;name;login;password;
+     * 
+     * @param   input      path to output file
+     * @throw   exception   on invalid header, on IO error
+     */
     void importCSV(const string& input) throw(exception);
     
     /**
@@ -123,15 +155,20 @@ public:
      */
     void printAllItemsWithSecrets() const;
 
+    void sortDatabase();
 
     virtual ~DatabaseManager();
     
 
+    const static string SEPARATOR;  ///separator characters in print methods
+    const static int    COL_WIDTH;  ///column width in print methods
+    
 private:
     Database* m_db;   ///database with entries
     string m_key;     ///key to cypher
     string m_hash;
-    string m_path;
+    string m_path;      ///active database file path
+    
 };
 
 

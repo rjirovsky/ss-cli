@@ -4,6 +4,7 @@
  *  @version 0.1
  * 
  *  Save storage for credentials (login and password)
+ * 
  *  Copyright (C) 2012  Radek Jirovský rjirovsky@gmail.com
  * 
  *  This program is free software; you can redistribute it and/or modify
@@ -37,7 +38,7 @@ string getKey();
 string getNewKey();
 
 /**
- * @brief 
+ * @brief User interface for Safe Storage database files.
  * 
  */
 int main(int argc, char **argv)
@@ -49,7 +50,9 @@ int main(int argc, char **argv)
         if(string(argv[1]) == "-f"){            ///set active database
             try {
                 dbm.loadDatabase(argv[2],getKey());
+                dbm.sortDatabase();
                 dbm.printAllItems();
+                dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
@@ -112,6 +115,7 @@ int main(int argc, char **argv)
             try {
                 dbm.loadDatabase(argv[2],getKey());
                 dbm.importCSV(string(argv[4]));
+                dbm.sortDatabase();
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -121,6 +125,7 @@ int main(int argc, char **argv)
             try {
                 dbm.loadDatabase(argv[2],getKey());
                 dbm.removeItem(argv[4]);
+                
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -131,6 +136,7 @@ int main(int argc, char **argv)
                 dbm.loadDatabase(argv[2],getKey());
                 Item* item = fillItem(argv[4]);
                 dbm.addItem(item);
+                dbm.sortDatabase();
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -143,7 +149,8 @@ int main(int argc, char **argv)
                 Item* item = fillItem(argv[4]);
                 dbm.editItem(item);
                 
-                delete item;    // entries are copied, item not used
+                delete item;    // entries are copied, item addr is not used
+                dbm.sortDatabase();
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -159,6 +166,12 @@ int main(int argc, char **argv)
     return 0;
 }
 
+/**
+ * @brief   Get input from user.
+ * 
+ * @param   name    name of new entry
+ * @return  filled Item
+ */
 Item* fillItem(string name){
     Item* item = new Item(); 
     
@@ -176,6 +189,11 @@ Item* fillItem(string name){
     return item;
 }
 
+/**
+ * @brief   Get secret key from user. It isn't echoed on cout.
+ * 
+ * @return  key
+ */
 string getKey() {
     
 /* Windows:
@@ -215,6 +233,11 @@ string getKey() {
     return pw;    
 }
 
+/**
+ * @brief   Get new password frim user.
+ * 
+ * @return  password
+ */
 string getNewKey() {
     
     // on Windows see getKey()
@@ -246,7 +269,9 @@ string getNewKey() {
     return pw1;    
 }
 
-
+/**
+ * @brief   Print help.
+ */
 void helpMessage(){
     
     cout << "Safe Storage (ss-cli) - password database" << endl;
@@ -257,10 +282,14 @@ void helpMessage(){
     cout << "   -f FILE_NAME [ARGS]- work with existing database" << endl;
     cout << "   Args:" << endl;
     cout << "      no args - list all entries (without secrets)" << endl;
-    cout << "      -L - list all entries with login and password (be carefull!)" << endl;
+    cout << "      -L - list all entries with login and password (be carefull!)" << endl;    
+    cout << "      -a NAME - add new entry with unique NAME to database" << endl;
+    cout << "      -rm NAME - remove entry with NAME from database" << endl;
+    cout << "      -e NAME - edit existing entry" << endl;
     cout << "      -l NAME - show complete entry with NAME (with secrets)" << endl;
     cout << "      -sn KEYWORD - search for entries containing KEYWORD in name" << endl;
-    cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl;
+    cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl << endl;
     cout << "      -E FILE_NAME - export database to CSV file" << endl;
     cout << "      -I FILE_NAME - import entries from CSV with header: group;name;login;password;" << endl;
+    
 }
