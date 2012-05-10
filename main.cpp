@@ -24,8 +24,9 @@
 
 #include <iostream>
 #include <string>
-#include <termios.h>
-#include <unistd.h>
+
+#include <termios.h>    ///for obtaining key from stdin 
+#include <unistd.h>     ///for obtaining key from stdin 
 
 
 #include "databasemanager.h"
