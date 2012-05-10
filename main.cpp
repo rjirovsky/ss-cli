@@ -1,5 +1,8 @@
 /** @file main.cpp
+ * 
  *  @author Radek Jirovsky
+ *  @version 0.1
+ * 
  *  Save storage for credentials (login and password)
  *  Copyright (C) 2012  Radek Jirovský rjirovsky@gmail.com
  * 
@@ -17,15 +20,21 @@
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
 #include <iostream>
+#include <string>
+#include <termios.h>
+#include <unistd.h>
+
 
 #include "databasemanager.h"
-#include <string>
 
 using namespace std;
 
 void helpMessage();
 Item* fillItem(string name);
+string getKey();
+string getNewKey();
 
 /**
  * @brief 
@@ -37,26 +46,26 @@ int main(int argc, char **argv)
     
     if(argc == 3){
         //cout << "#3" << endl;
-        if(string(argv[1]) == "-f"){
+        if(string(argv[1]) == "-f"){            ///set active database
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.printAllItems();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
             }
-        } else if (string(argv[1]) == "-n"){
+        } else if (string(argv[1]) == "-n"){    ///new database file
             try {
-                dbm.createDatabase(argv[2],"klic");
+                dbm.createDatabase(argv[2],getNewKey());
             } catch (exception& ex){
                 cerr << "Error creating database: " << ex.what() << endl;
             }
         } 
     } else if (argc == 4){
         //cout << "#4" << endl;
-        if(string(argv[3]) == "-L"){
+        if(string(argv[3]) == "-L"){            ///print all with secrets
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.printAllItemsWithSecrets();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -66,63 +75,75 @@ int main(int argc, char **argv)
             helpMessage();
         }
     } else if (argc == 5){
-        //cout << "#5" << endl;
-        if(string(argv[3]) == "-sn"){
+        if(string(argv[3]) == "-sn"){           ///search by name
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.printItemsByName(string(argv[4]));
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
             }
-        } else if(string(argv[3]) == "-sg"){
+        } else if(string(argv[3]) == "-sg"){    ///search by group
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.printItemsByGroup(string(argv[4]));
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
             }
-        } else if(string(argv[3]) == "-l"){
+        } else if(string(argv[3]) == "-l"){     ///print by name
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.printItemByName(string(argv[4]));
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
             }
             
-        } else if(string(argv[3]) == "-E"){
+        } else if(string(argv[3]) == "-E"){     ///export
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.exportDatabase(string(argv[4]));
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Export error: " << ex.what() << endl;
             }
-        } else if(string(argv[3]) == "-I"){
+        } else if(string(argv[3]) == "-I"){     ///import
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.importCSV(string(argv[4]));
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Import error: " << ex.what() << endl;
             }
-        } else if(string(argv[3]) == "-rm"){
+        } else if(string(argv[3]) == "-rm"){    ///remove item
             try {
-                dbm.loadDatabase(argv[2],"klic");
+                dbm.loadDatabase(argv[2],getKey());
                 dbm.removeItem(argv[4]);
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error removing entry: " << ex.what() << endl;
             }
-        } else if(string(argv[3]) == "-a"){
+        } else if(string(argv[3]) == "-a"){     /// add item
             try {
-                dbm.loadDatabase(argv[2],"klic");
-                Item * item = fillItem(argv[4]);
+                dbm.loadDatabase(argv[2],getKey());
+                Item* item = fillItem(argv[4]);
                 dbm.addItem(item);
+                dbm.saveDatabase();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error inserting entry: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-e"){     /// edit item
+            try {
+                dbm.loadDatabase(argv[2],getKey());
+                
+                Item* item = fillItem(argv[4]);
+                dbm.editItem(item);
+                
+                delete item;    // entries are copied, item not used
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
@@ -135,33 +156,96 @@ int main(int argc, char **argv)
         helpMessage();
     }
 
-
-//     dbm.addItem("", "nazev2", "login2", "heslo2");
-//     cout << "All:" << endl;
-//      dbm.printAllItems();
-//     cout << "All with pass.:" << endl;
-//     dbm.printAllItemsWithSecrets();
-//      cout << "Search by name:" << endl;
-//      dbm.printItemsByName("na");
-//     cout << "Search by group:" << endl;
-//     dbm.printItemsByGroup("default");
-//      cout << "Removing" << endl;
-//       dbm.removeItem("nazev1");
-
-//      
-//       dbm.editItem("banka","nazev5","","1234");
-       
-     
-//      dbm.saveDatabase();
-      
-     
-
     return 0;
 }
 
 Item* fillItem(string name){
+    Item* item = new Item(); 
     
+    item->name = name;
+    
+    cout << "Group [default]: ";
+    getline(cin,item->group);
+
+    //cout << endl;
+    cout << "Login [none]: ";
+    getline(cin,item->login);
+    //cout << endl;
+    item->password = getNewKey();
+    
+    return item;
 }
+
+string getKey() {
+    
+/* Windows:
+
+    #include <windows.h>
+    
+
+        HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE); 
+        DWORD mode = 0;
+        GetConsoleMode(hStdin, &mode);
+        SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+        
+        string pw;
+        cout << "Enter master password: ";
+        
+        getline(cin, pw);        
+        cout<< endl;
+  
+        //cleanup:
+        
+        SetConsoleMode(hStdin, mode);
+        
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); */
+    
+    cout << "Enter master password: ";
+    termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    
+    string pw;
+    getline(cin, pw);
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+
+    cout << endl;
+    return pw;    
+}
+
+string getNewKey() {
+    
+    // on Windows see getKey()
+    
+    string pw1, pw2;
+    
+    termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    
+    while (true){    
+        cout << "Enter new password: ";
+        getline(cin, pw1);
+        cout << endl << "Re-enter password: ";
+        getline(cin, pw2);
+        cout << endl;
+        
+        if(pw1 == pw2){
+            break;
+        } else {
+            cerr << "Passwords are different! Try again." << endl;
+        }
+    }
+    
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        
+    return pw1;    
+}
+
 
 void helpMessage(){
     

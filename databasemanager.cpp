@@ -25,6 +25,7 @@
 #include <sstream>
 
 
+
 using namespace std;
 
 DatabaseManager::DatabaseManager()
@@ -287,7 +288,6 @@ void DatabaseManager::editItem(Item * item) throw(invalid_argument)
 }
 
 
-
 void DatabaseManager::printItemsByName(const string& name) const
 {
     cout << "Database " << m_path << ":" << endl;
@@ -312,6 +312,8 @@ void DatabaseManager::printItemsByName(const string& name) const
         cout << "------------------------" << endl;
     }
 }
+
+
 void DatabaseManager::printItemsByGroup(const string& group) const
 {
     cout << "Database " << m_path << ":" << endl;
@@ -336,6 +338,7 @@ void DatabaseManager::printItemsByGroup(const string& group) const
         cout << "------------------------" << endl;
     }
 }
+
 
 void DatabaseManager::printItemByName(const string& name) const
 {
@@ -412,9 +415,10 @@ void DatabaseManager::printAllItemsWithSecrets() const
     if (!found){
         cout << "Database is empty!" << endl;
         cout << "------------------------" << endl;
-    }
-    
+    }    
 }
+
+
 
 DatabaseManager::~DatabaseManager()
 {

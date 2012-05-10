@@ -22,6 +22,7 @@
 #include <list>
 #include <stdexcept>
 
+
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
 
@@ -69,10 +70,7 @@ public:
     /**
      * @brief   Add new entry to database.
      * 
-     * @param   group       optional param., if empty, uses "default" group namespace
-     * @param   name        required param., unique name for entry
-     * @param   login       optional param., if empty, uses "none" string, it's stored encrypted
-     * @param   password    required param., password is encrypted 
+     * @param   item    struct with attributes
      * 
      * @throw   invalid_argument    if name or password is empty or name is already in db
      */
@@ -90,10 +88,7 @@ public:
     /**
      * @brief   Edit existing entry by name
      * 
-     * @param   group       optional param., if empty, uses "default" group namespace
-     * @param   name        required param., name of existing entry, must be the same
-     * @param   login       optional param., if empty, uses "none" string, it's stored encrypted
-     * @param   password    required param., password is encrypted 
+     * @param   item    struct with attributes
      * 
      * @throw   invalid_argument    if name or password is empty or name is NOT in database
      */
@@ -127,6 +122,7 @@ public:
      * Carefull! Same as printAllItems(), but prints readable login and password.
      */
     void printAllItemsWithSecrets() const;
+
 
     virtual ~DatabaseManager();
     
