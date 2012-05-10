@@ -45,7 +45,7 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
     string group, name, login, password;
     
     ifstream dbFile;
-    dbFile.open(m_path.c_str(),  fstream::in);
+    dbFile.open(m_path.c_str(),  ifstream::in);
     
     if (dbFile.is_open())
     {
@@ -63,13 +63,24 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
         }
         while ( dbFile.good() )
         {
+
             getline (dbFile,in);
-            if (!in.empty()){       //To-do :handle strings with spaces!
+            
+            
+            if (!in.empty()){
                 line.str(in);
-                line >> group;
-                line >> name;
-                line >> login;
-                line >> password;
+                getline (line,in,';');
+                group = string(in, 0, in.length());
+                
+                getline (line,in,';');
+                name = string (in, 0, in.length());
+                
+                getline (line,in,';');
+                login = string(in, 0, in.length());
+                
+                getline (line,in,';');
+                password = string(in, 0, in.length());
+
                 line.clear();
                 
                 Item* item = new Item(group,name,login,password);
@@ -130,8 +141,8 @@ void DatabaseManager::saveDatabase()
             list<Item*> items = m_db->getAllItems();
             
             for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-                dbFile << (**iterator).getGroup() << " " << (**iterator).getName() << " " << (**iterator).getLogin() << " " 
-                << (**iterator).getPassword() << endl;        
+                dbFile << (**iterator).getGroup() << ";" << (**iterator).getName() << ";" << (**iterator).getLogin() << ";" 
+                << (**iterator).getPassword() << ";" << endl;        
             }
             
             dbFile.close();
@@ -202,7 +213,7 @@ void DatabaseManager::printItemsByName(const string& name) const
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
     cout.width(16);
-    cout << "Name" << "(group)" << endl;
+    cout << "NAME" << "(GROUP)" << endl;
     cout << "------------------------" << endl;
     
     bool found = false;
@@ -226,7 +237,7 @@ void DatabaseManager::printItemsByGroup(const string& group) const
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
     cout.width(16);
-    cout << "Name" << "(group)" << endl;
+    cout << "NAME" << "(GROUP)" << endl;
     cout << "------------------------" << endl; 
     
     bool found = false;
@@ -251,9 +262,9 @@ void DatabaseManager::printItemByName(const string& name) const
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
     cout.width(16);
-    cout << "Name" << "(group)" << endl;
+    cout << "NAME" << "(GROUP)" << endl;
     cout.width(16);
-    cout << "login" << "password" << endl; 
+    cout << "LOGIN" << "PASSWORD" << endl; 
     cout << "------------------------" << endl; 
     
     Item* item = m_db->getItemByName(name);
@@ -276,7 +287,7 @@ void DatabaseManager::printAllItems() const
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
     cout.width(16);
-    cout << "Name" << "(group)" << endl;
+    cout << "NAME" << "(GROUP)" << endl;
     cout << "------------------------" << endl; 
     
     bool found = false;
@@ -301,9 +312,9 @@ void DatabaseManager::printAllItemsWithSecrets() const
     cout << "Database " << m_path << ":" << endl;
     cout.setf(ios::left);
     cout.width(16);
-    cout << "Name" << "(group)" << endl;
+    cout << "NAME" << "(GROUP)" << endl;
     cout.width(16);
-    cout << "login" << "password" << endl; 
+    cout << "LOGIN" << "PASSWORD" << endl; 
     cout << "------------------------" << endl; 
     
     bool found = false;

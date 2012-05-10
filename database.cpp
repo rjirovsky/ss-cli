@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 const string Database::HEADER = "SAFE_STORAGE";
-const string Database::CAPTION = "group name login password";
+const string Database::CAPTION = "group;name;login;password;";
 
 Database::Database()
 {
