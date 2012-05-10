@@ -38,13 +38,10 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
     m_key = key;
     m_path = path;
     
-    stringstream line;
-    
-    string in;
-    string header;
-    string group, name, login, password;
-    
+    stringstream line;    
+    string header, in, group, name, login, password;
     ifstream dbFile;
+    
     dbFile.open(m_path.c_str(),  ifstream::in);
     
     if (dbFile.is_open())
@@ -58,17 +55,18 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
         if (dbFile.good()){
             getline (dbFile,m_hash);
         }
-        if (dbFile.good()){ //params line
+        if (dbFile.good()){ //throw out params line
             getline (dbFile,in);
         }
         while ( dbFile.good() )
         {
 
-            getline (dbFile,in);
+            getline (dbFile,in);    //read one line from file
             
             
-            if (!in.empty()){
-                line.str(in);
+            if (!in.empty()){   //skip empty lines
+                //parse line
+                line << in;
                 getline (line,in,';');
                 group = string(in, 0, in.length());
                 
@@ -80,12 +78,10 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
                 
                 getline (line,in,';');
                 password = string(in, 0, in.length());
-
-                line.clear();
                 
                 Item* item = new Item(group,name,login,password);
                 
-                m_db->insertItem(item);
+                m_db->insertItem(item); //insert to db
             }
         }
         dbFile.close();
@@ -155,6 +151,89 @@ void DatabaseManager::saveDatabase()
     }
 }
 
+void DatabaseManager::exportDatabase(const string& out) throw(exception)
+{
+    if (m_db){
+        ofstream outFile;
+        outFile.open(out.c_str(), ofstream::out|ofstream::trunc);
+        
+        if (outFile.is_open())
+        {              
+            outFile << Database::CAPTION << endl;
+            
+            list<Item*> items = m_db->getAllItems();
+            
+            for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
+                outFile << (**iterator).getGroup() << ";" << (**iterator).getName() << ";" 
+                        << m_db->decrypt((**iterator).getLogin()) << ";" 
+                        << m_db->decrypt((**iterator).getPassword()) << ";" << endl;        
+            }
+            
+            outFile.close();
+            
+        } else {
+            throw ofstream::failure("Cannot write output file! Check your premissions.");
+        }
+    } else {
+        throw runtime_error("Database is NOT opened!");
+    }
+}
+
+void DatabaseManager::importCSV(const string& input) throw(exception)
+{
+    stringstream line;    
+    string header, in, group, name, login, password;
+    ifstream csvFile;
+    int counter = 0;
+    
+    csvFile.open(input.c_str(),  ifstream::in);
+    
+    if (csvFile.is_open())
+    {
+        if (csvFile.good()){
+            getline (csvFile,header);
+            if (header != Database::CAPTION){
+                throw runtime_error("Invalid CSV header!");
+            }
+        }
+
+        while ( csvFile.good() )
+        {
+            getline (csvFile,in);    //read one line from file
+            
+            if (!in.empty()){   //skip empty lines
+                //parse line
+                line << in;
+                getline (line,in,';');
+                group = string(in, 0, in.length());
+                
+                getline (line,in,';');
+                name = string (in, 0, in.length());
+                
+                getline (line,in,';');
+                login = string(in, 0, in.length());
+                
+                getline (line,in,';');
+                password = string(in, 0, in.length());
+ 
+                try {
+                    addItem(group, name, login, password);
+                    counter++;
+                } catch (invalid_argument& ex){
+                    cerr << ex.what() << endl;
+                    continue;
+                }
+            }
+        }
+        csvFile.close();
+        cout << "Successfuly imported entries: " << counter << endl;
+        
+    } else {
+        throw ifstream::failure("Cannot read database file! Check your premissions.");
+    }    
+}
+
+
 
 void DatabaseManager::addItem(string group, const string& name, string login, const string& password) throw(invalid_argument) {
   
@@ -170,7 +249,7 @@ void DatabaseManager::addItem(string group, const string& name, string login, co
         Item* workingItem = new Item(group, name, m_db->encrypt(login), m_db->encrypt(password));
         m_db->insertItem(workingItem);
     } else {
-        throw invalid_argument("Such name ( " + name + " ) already in database!");
+        throw invalid_argument("Such name ( " + name + " ) already in database! Skipping.");
     }
 }
 

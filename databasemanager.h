@@ -62,6 +62,10 @@ public:
      */
     void createDatabase(const string& dbFile, const string& key) throw(exception);
     
+    void exportDatabase(const string& output) throw(exception);
+    
+    void importCSV(const string& input) throw(exception);
+    
     /**
      * @brief   Add new entry to database.
      * 

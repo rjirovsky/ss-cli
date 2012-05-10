@@ -90,6 +90,24 @@ int main(int argc, char **argv)
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
             }
+            
+        } else if(string(argv[3]) == "-E"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.exportDatabase(string(argv[4]));
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
+        } else if(string(argv[3]) == "-I"){
+            try {
+                dbm.loadDatabase(argv[2],"klic");
+                dbm.importCSV(string(argv[4]));
+                dbm.saveDatabase();
+                dbm.closeDatabase();
+            } catch (exception& ex){
+                cerr << "Error loading database: " << ex.what() << endl;
+            }
         } else {
             helpMessage();
         }
@@ -142,5 +160,6 @@ void helpMessage(){
     cout << "      -l NAME - show complete entry with NAME (with secrets)" << endl;
     cout << "      -sn KEYWORD - search for entries containing KEYWORD in name" << endl;
     cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl;
-    
+    cout << "      -E FILE_NAME - export database to CSV file" << endl;
+    cout << "      -I FILE_NAME - import entries from CSV with header: group;name;login;password;" << endl;
 }
