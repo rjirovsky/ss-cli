@@ -51,9 +51,9 @@ int main(int argc, char **argv)
         if(string(argv[1]) == "-f"){            ///set active database
             try {
                 dbm.loadDatabase(argv[2],getKey());
-                dbm.sortDatabase();
+                //dbm.sortDatabase();
                 dbm.printAllItems();
-                dbm.saveDatabase();
+                //dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;

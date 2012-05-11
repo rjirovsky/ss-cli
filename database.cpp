@@ -130,22 +130,16 @@ string Database::decrypt(string& str)
 void Database::deriveKey(string password)
 {
 
-    
-//     unsigned char ibuf[] = "compute sha1";
-//     unsigned char obuf[20];
-//     
-//     SHA1((unsigned char*)password.c_str(), password.length(), obuf);
-//     
-//     int i;
-//     for (i = 0; i < 20; i++) {
-//         printf("%02x ", obuf[i]);
-//     }
-//     printf("\n");
+    CryptoPP::SHA256 hash;
+    hash.Update((unsigned char *)password.c_str(), password.length());
+//     hash.Update(pbData2, nData2Len);
+//     hash.Update(pbData3, nData3Len);
+    hash.Final(m_key);
     
     
     ///temp key
-    ::memset( m_key, 0x01, CryptoPP::CIPHER::DEFAULT_KEYLENGTH );
-    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE );
+    ///::memset( m_key, 0x01, CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
+    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE );        ///blocksize 128b
     
 }
 

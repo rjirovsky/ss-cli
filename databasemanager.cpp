@@ -43,6 +43,10 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
     string header, in;
     ifstream dbFile;
     
+    m_db->deriveKey(key);
+    
+    //check key here
+    
     dbFile.open(m_path.c_str(),  ifstream::in);
     
     if (dbFile.is_open())
@@ -75,10 +79,10 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
                 getline (line,in,';');
                 item->name = string (in, 0, in.length());
                 
-                getline (line,in,';');
+                getline (dbFile,in);
                 item->login = string(in, 0, in.length());
                 
-                getline (line,in,';');
+                getline (dbFile,in);
                 item->password = string(in, 0, in.length());
                 
                 m_db->insertItem(item); //insert to db
@@ -92,9 +96,13 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
     
 }
 
-void DatabaseManager::createDatabase(const string& path, const string& key) throw(exception)
+void DatabaseManager::createDatabase(const string& path, const string& password) throw(exception)
 {
     ofstream dbFile;
+    m_db = new Database();
+    
+    m_db->deriveKey(password);
+    
     dbFile.open(path.c_str(), ofstream::out|ofstream::binary);
     
     if (dbFile.is_open())
@@ -109,11 +117,13 @@ void DatabaseManager::createDatabase(const string& path, const string& key) thro
     } else {
         throw ofstream::failure("Cannot write database file! Check your premissions.");
     }
+    
+    delete m_db;
 }
 
 void DatabaseManager::closeDatabase()
 {
-    delete(m_db);
+    delete m_db;
     m_db = NULL;
     
     m_key.clear();
@@ -137,8 +147,9 @@ void DatabaseManager::saveDatabase()
             list<Item*> items = m_db->getAllItems();
             
             for (list<Item*>::iterator iterator = items.begin(), end = items.end(); iterator != end; ++iterator) {
-                dbFile << (**iterator).group << ";" << (**iterator).name << ";" << (**iterator).login << ";" 
-                << (**iterator).password << ";" << endl;        
+                dbFile << (**iterator).group << ";" << (**iterator).name << ";" << endl 
+                    << (**iterator).login << endl
+                    << (**iterator).password  << endl;        
             }
             
             dbFile.close();
@@ -404,7 +415,7 @@ void DatabaseManager::printAllItemsWithSecrets() const
     list<Item*> itemsList = m_db->getAllItems();
     for (list<Item*>::iterator iterator = itemsList.begin(), end = itemsList.end(); iterator != end; ++iterator) {
         cout.width(COL_WIDTH);
-        //cout << (**iterator) << endl;
+        cout << (**iterator) << endl;
         cout.width(COL_WIDTH);
         cout << m_db->decrypt((**iterator).login) << m_db->decrypt((**iterator).password) << endl; 
         cout << SEPARATOR << endl;
