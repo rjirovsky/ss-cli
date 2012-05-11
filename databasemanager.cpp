@@ -95,7 +95,7 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
 void DatabaseManager::createDatabase(const string& path, const string& key) throw(exception)
 {
     ofstream dbFile;
-    dbFile.open(path.c_str(), ofstream::out);
+    dbFile.open(path.c_str(), ofstream::out|ofstream::binary);
     
     if (dbFile.is_open())
     {
@@ -126,7 +126,7 @@ void DatabaseManager::saveDatabase()
 {
     if (m_db){
         ofstream dbFile;
-        dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc);
+        dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
         
         if (dbFile.is_open())
         {              

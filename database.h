@@ -17,16 +17,26 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "list"
+#include <list>
 #include <stdexcept>
 #include <sys/mman.h>
 #include <cstdio>
 #include <iostream>
 
+#include <cryptopp/modes.h>
+#include <cryptopp/filters.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/aes.h>
+
+#define CIPHER AES
+#define CIPHER_MODE CBC_Mode
+
+
 #ifndef DATABASE_H
 #define DATABASE_H
 
 using namespace std;
+using namespace CryptoPP;
 
 /**
  * @brief Stricture for saving user input.
@@ -96,11 +106,7 @@ public:
      * @return  path to database file
      */
     string getPath() const {return m_path;}
-    
-    
-
-
-    
+       
     /**
      * @brief   Find Item with given name.
      * 
@@ -122,14 +128,16 @@ public:
      * 
      * @param   str string to encrypt
      */
-    string encrypt(string str);
+    string encrypt(string& str);
     
     /**
      * @brief   Decrypt given string using symetric cypher. Uses m_key.
      * 
      * @param   str string to decrypt
      */
-    string decrypt(string str);
+    string decrypt(string& str);
+    
+    void deriveKey(string password);
     
     
     /**
@@ -144,7 +152,8 @@ public:
     const static string CAPTION;
 private:
     list<Item*> items;  ///list of Items from database file
-    string m_key;       ///key for symetric cypher
+    byte m_key[CryptoPP::CIPHER::DEFAULT_KEYLENGTH];       ///key for symetric cypher
+    byte iv[ CryptoPP::CIPHER::BLOCKSIZE ];         ///inicialization vector
     string m_hash;      ///control hash from file
     string m_path;      ///path to database file
 };

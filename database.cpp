@@ -19,10 +19,20 @@
 
 
 #include "database.h"
-#include <fstream>
 
+
+
+
+// #include <openssl/sha.h>
+// #include <string.h>
+
+#include <fstream>
 #include <sstream>
 #include <fcntl.h>
+
+
+
+
 
 const string Database::HEADER = "SAFE_STORAGE";
 const string Database::CAPTION = "group;name;login;password;";
@@ -64,15 +74,82 @@ void Database::sortDatabase()
 }
 
 
-string Database::encrypt(string str)
+string Database::encrypt(string& str)
 {
-    return str;
+    string plainText = str;
+    string cypherText;
+    
+    try
+    {       
+        // Encryptor
+        CryptoPP::CIPHER_MODE<CryptoPP::CIPHER>::Encryption
+        Encryptor( m_key, sizeof(m_key), iv );
+        
+        // Encryption
+        CryptoPP::StringSource( plainText, true,
+                    new CryptoPP::StreamTransformationFilter( Encryptor,
+                            new CryptoPP::StringSink( cypherText )
+                                                            ) // StreamTransformationFilter
+                              ); // StringSource
+    }
+    catch( CryptoPP::Exception& e)
+    {
+        cerr << e.what() << endl;
+    }   
+    
+    return cypherText;
 }
 
-string Database::decrypt(string str)
+string Database::decrypt(string& str)
 {
-    return str;
+    string cypherText = str;
+    string recoveredText;
+    
+    try{
+       
+        
+        // Decryptor
+        CryptoPP::CIPHER_MODE<CryptoPP::CIPHER>::Decryption
+        Decryptor( m_key, sizeof(m_key), iv );
+        
+        // Decryption
+        CryptoPP::StringSource( cypherText, true,
+                                new CryptoPP::StreamTransformationFilter( Decryptor,
+                                                                          new CryptoPP::StringSink( recoveredText )
+                                ) // StreamTransformationFilter
+        ); // StringSource
+    }
+    catch( CryptoPP::Exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+    
+    return recoveredText;
 }
+
+void Database::deriveKey(string password)
+{
+
+    
+//     unsigned char ibuf[] = "compute sha1";
+//     unsigned char obuf[20];
+//     
+//     SHA1((unsigned char*)password.c_str(), password.length(), obuf);
+//     
+//     int i;
+//     for (i = 0; i < 20; i++) {
+//         printf("%02x ", obuf[i]);
+//     }
+//     printf("\n");
+    
+    
+    ///temp key
+    ::memset( m_key, 0x01, CryptoPP::CIPHER::DEFAULT_KEYLENGTH );
+    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE );
+    
+}
+
+
 
 Database::~Database()
 {
