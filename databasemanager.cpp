@@ -33,19 +33,17 @@ DatabaseManager::DatabaseManager()
     
 }
 
-void DatabaseManager::loadDatabase(const string& path, const string& key) throw(exception){
+void DatabaseManager::loadDatabase(const string& path, const string& password) throw(exception){
     
     m_db = new Database();
-    m_key = key;
+    m_db->deriveKey(password);
     m_path = path;
     
     stringstream line;
-    string header, in;
+    string header, in, checksum;
     ifstream dbFile;
     
-    m_db->deriveKey(key);
     
-    //check key here
     
     dbFile.open(m_path.c_str(),  ifstream::in);
     
@@ -58,7 +56,16 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
             }
         }
         if (dbFile.good()){
-            getline (dbFile,m_hash);
+            getline (dbFile,in); // Carefull, checksum from file contains new line char
+            
+            m_db->setChecksum(in);
+
+            cout << endl << "Loaded checksum #" << m_db->getChecksum() << "#" << endl;
+
+            if( !(m_db->checkPassword())){
+                    throw runtime_error("Wrong password!");
+            }
+
         }
         if (dbFile.good()){ //throw out params line
             getline (dbFile,in);
@@ -99,17 +106,19 @@ void DatabaseManager::loadDatabase(const string& path, const string& key) throw(
 void DatabaseManager::createDatabase(const string& path, const string& password) throw(exception)
 {
     ofstream dbFile;
-    m_db = new Database();
     
-    m_db->deriveKey(password);
+    m_db = new Database();    
+    m_db->deriveKey(password);      //fill m_key in Database
+    m_db->deriveChecksum();         //fill m_checksum in Database
     
-    dbFile.open(path.c_str(), ofstream::out|ofstream::binary);
+    dbFile.open(path.c_str(), ofstream::out);
     
     if (dbFile.is_open())
     {
         dbFile << Database::HEADER << endl;
         
-        dbFile << m_hash << endl;   // hash must be computed here
+        cout << "Create db#" << m_db->getChecksum() << "#" << endl;
+        dbFile << m_db->getChecksum() << endl;   // hash must be computed here
         
         dbFile << Database::CAPTION << endl;
         
@@ -125,9 +134,6 @@ void DatabaseManager::closeDatabase()
 {
     delete m_db;
     m_db = NULL;
-    
-    m_key.clear();
-    m_hash.clear();
     m_path.clear();
 }
 
@@ -136,12 +142,13 @@ void DatabaseManager::saveDatabase()
 {
     if (m_db){
         ofstream dbFile;
-        dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc|ofstream::binary);
+        dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc);
         
         if (dbFile.is_open())
         {              
-            dbFile << Database::HEADER << endl;            
-            dbFile << m_hash << endl; //temporary
+            dbFile << Database::HEADER << endl;
+            cout << "Save db: #" << m_db->getChecksum() << "#" << endl;
+            dbFile << m_db->getChecksum() << endl;
             dbFile << Database::CAPTION << endl;
             
             list<Item*> items = m_db->getAllItems();
@@ -248,7 +255,8 @@ void DatabaseManager::importCSV(const string& input) throw(exception)
 
 
 void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
-  
+    cout << "Add item begining #" << m_db->getChecksum() << "#" << endl;
+    
     if (item->group.empty()) item->group = "default"; 
     if (item->login.empty()) item->login = "none";
     
@@ -264,6 +272,7 @@ void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
     } else {
         throw invalid_argument("Such name (" + item->name + ") already in database! Skipping.");
     }
+    cout << "Add item end #" << m_db->getChecksum() << "#" << endl;
 }
 
 void DatabaseManager::removeItem(const string& name) throw(invalid_argument)

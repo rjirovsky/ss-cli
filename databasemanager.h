@@ -165,8 +165,6 @@ public:
     
 private:
     Database* m_db;   ///database with entries
-    string m_key;     ///key to cypher
-    string m_hash;
     string m_path;      ///active database file path
     
 };

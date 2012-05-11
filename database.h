@@ -128,16 +128,23 @@ public:
      * 
      * @param   str string to encrypt
      */
-    string encrypt(string& str);
+    string encrypt(string str);
     
     /**
      * @brief   Decrypt given string using symetric cypher. Uses m_key.
      * 
      * @param   str string to decrypt
      */
-    string decrypt(string& str);
+    string decrypt(string str);
     
     void deriveKey(string password);
+    
+    void deriveChecksum();
+    
+    bool checkPassword();
+    
+    string getChecksum(){return m_checksum;}
+    void setChecksum(string checksum){m_checksum = checksum;}
     
     
     /**
@@ -154,7 +161,7 @@ private:
     list<Item*> items;  ///list of Items from database file
     byte m_key[CryptoPP::CIPHER::DEFAULT_KEYLENGTH];       ///key for symetric cypher
     byte iv[ CryptoPP::CIPHER::BLOCKSIZE ];         ///inicialization vector
-    string m_hash;      ///control hash from file
+    string m_checksum;      ///control hash from file
     string m_path;      ///path to database file
 };
 

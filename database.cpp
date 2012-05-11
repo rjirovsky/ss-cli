@@ -20,12 +20,6 @@
 
 #include "database.h"
 
-
-
-
-// #include <openssl/sha.h>
-// #include <string.h>
-
 #include <fstream>
 #include <sstream>
 #include <fcntl.h>
@@ -41,7 +35,12 @@ bool compare(Item* first, Item* second);
 
 Database::Database()
 {
-
+    mlock(&m_key, CryptoPP::CIPHER::DEFAULT_KEYLENGTH);
+    mlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);
+    
+    ///temp key
+    ///::memset( m_key, 0x01, CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
+    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE ); 
 }
 
 Item* Database::getItemByName(const string& name)
@@ -74,9 +73,8 @@ void Database::sortDatabase()
 }
 
 
-string Database::encrypt(string& str)
+string Database::encrypt(string plainText)
 {
-    string plainText = str;
     string cypherText;
     
     try
@@ -94,15 +92,14 @@ string Database::encrypt(string& str)
     }
     catch( CryptoPP::Exception& e)
     {
-        cerr << e.what() << endl;
+        cerr << "Encryption error: " << e.what() << endl;
     }   
     
     return cypherText;
 }
 
-string Database::decrypt(string& str)
+string Database::decrypt(string cypherText)
 {
-    string cypherText = str;
     string recoveredText;
     
     try{
@@ -121,28 +118,40 @@ string Database::decrypt(string& str)
     }
     catch( CryptoPP::Exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Decryption error: " << e.what() << std::endl;
     }
     
+    cout << endl << "Decrypted key: " << recoveredText << endl;
     return recoveredText;
 }
 
 void Database::deriveKey(string password)
 {
-
+    string open = string(password,0,password.length()-2); ///?????????????
+    cout << endl << "Opened key: >" << password.data() << "<" << endl;
+    cout << endl << "Used key: >" << open.data() << "<" << endl;
     CryptoPP::SHA256 hash;
-    hash.Update((unsigned char *)password.c_str(), password.length());
+    hash.Update((unsigned char*) open.c_str(), open.length());
 //     hash.Update(pbData2, nData2Len);
 //     hash.Update(pbData3, nData3Len);
     hash.Final(m_key);
     
     
-    ///temp key
-    ///::memset( m_key, 0x01, CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
-    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE );        ///blocksize 128b
-    
+       ///blocksize 128b
+ 
+    cout << endl << "Derived key: " << m_key << endl;
 }
 
+bool Database::checkPassword()
+{
+    //cout << decrypt(m_checksum) << endl << m_key << endl;
+    return !(decrypt(m_checksum).compare(string((char*) m_key)));
+}
+
+void Database::deriveChecksum()
+{
+    m_checksum = encrypt( string((char*) m_key) );
+}
 
 
 Database::~Database()
@@ -151,6 +160,10 @@ Database::~Database()
         delete *it;
     }
     items.clear();
+    
+    munlock(&m_key, CryptoPP::CIPHER::DEFAULT_KEYLENGTH);
+    munlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);
+    
 }
 
 ostream& operator <<(ostream& out, const Item& item) {
