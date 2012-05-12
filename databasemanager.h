@@ -168,6 +168,4 @@ private:
     
 };
 
-
-
 #endif // DATABASEMANAGER_H

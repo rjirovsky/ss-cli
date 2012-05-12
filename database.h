@@ -129,14 +129,14 @@ public:
      * 
      * @param   str string to encrypt
      */
-    string encrypt(string str);
+    string encrypt(string& str);
     
     /**
      * @brief   Decrypt given string using symetric cypher. Uses m_key.
      * 
      * @param   str string to decrypt
      */
-    string decrypt(string str);
+    string decrypt(string& str);
     
     void deriveKey(const string& password);
     
@@ -147,7 +147,7 @@ public:
     string getChecksum(){return m_checksum;}
     void setChecksum(string checksum){m_checksum = checksum;}
     
-    string SHA256(string in);
+    string SHA1(string in);
     
     /**
      * @brief   Free all alocated memory.
@@ -157,14 +157,14 @@ public:
     void sortDatabase();
     
     
-    const static string HEADER; ///control header of file
-    const static string CAPTION;
+    const static string HEADER;                         ///control header of file
+    const static string CAPTION;                        ///atributes caption
 private:
-    list<Item*> items;  ///list of Items from database file
-    byte m_key[CryptoPP::CIPHER::MAX_KEYLENGTH];       ///key for symetric cypher 256b
-    byte iv[ CryptoPP::CIPHER::BLOCKSIZE ];         ///inicialization vector
-    string m_checksum;      ///control hash from file
-    string m_path;      ///path to database file
+    list<Item*> items;                                  ///list of Items from database file
+    byte m_key[CryptoPP::CIPHER::MAX_KEYLENGTH];        ///key for symetric cypher 256b
+    byte iv[ CryptoPP::CIPHER::BLOCKSIZE ];             ///inicialization vector
+    string m_checksum;                                  ///control hash from file
+    string m_path;                                      ///path to database file
 };
 
 

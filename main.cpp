@@ -232,7 +232,7 @@ string getKey() {
     cout << endl;
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
-    return "ahoj";    
+    return pw;    
 }
 
 /**
@@ -268,7 +268,7 @@ string getNewKey() {
     
     tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
         
-    return "ahoj";    
+    return pw1;    
 }
 
 /**
