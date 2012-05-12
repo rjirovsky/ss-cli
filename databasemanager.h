@@ -65,7 +65,7 @@ public:
      * 
      * @throw   exception   if no database opened or IO error
      */
-    void saveDatabase();
+    void saveDatabase() throw(exception);
     
     /**
      * @brief   Create new database file on path with given key.
@@ -165,7 +165,6 @@ public:
     
 private:
     Database* m_db;   ///database with entries
-    string m_path;      ///active database file path
     
 };
 

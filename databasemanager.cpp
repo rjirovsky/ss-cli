@@ -30,22 +30,33 @@ using namespace std;
 
 DatabaseManager::DatabaseManager()
 {
-    
+//     m_db = new Database("test");
+//     cout << m_db->SHA256("ahoj") << endl;
+//     cout << m_db->SHA256("ahoj") << endl;
+//     cout << m_db->SHA256("ahoj") << endl;
+//     delete m_db;
+//     m_db = NULL;
+//     
+//     m_db = new Database("test");
+//     cout << m_db->SHA256("ahoj") << endl;
+//     cout << m_db->SHA256("ahoj") << endl;
+//     cout << m_db->SHA256("ahoj") << endl;
+//     delete m_db;
+//     m_db = NULL;
 }
 
-void DatabaseManager::loadDatabase(const string& path, const string& password) throw(exception){
+void DatabaseManager::loadDatabase(const string& path, const string& password) throw(exception)
+{
+    cout << "DatabaseManager::loadDatabase()" << endl;
     
-    m_db = new Database();
+    m_db = new Database(path);
     m_db->deriveKey(password);
-    m_path = path;
-    
+   
     stringstream line;
     string header, in, checksum;
     ifstream dbFile;
-    
-    
-    
-    dbFile.open(m_path.c_str(),  ifstream::in);
+   
+    dbFile.open(m_db->getPath().c_str(),  ifstream::in|ifstream::binary);
     
     if (dbFile.is_open())
     {
@@ -60,7 +71,7 @@ void DatabaseManager::loadDatabase(const string& path, const string& password) t
             
             m_db->setChecksum(in);
 
-            cout << endl << "Loaded checksum #" << m_db->getChecksum() << "#" << endl;
+            //cout << endl << "Loaded checksum #" << m_db->getChecksum() << "#" << endl;
 
             if( !(m_db->checkPassword())){
                     throw runtime_error("Wrong password!");
@@ -104,20 +115,21 @@ void DatabaseManager::loadDatabase(const string& path, const string& password) t
 }
 
 void DatabaseManager::createDatabase(const string& path, const string& password) throw(exception)
-{
-    ofstream dbFile;
+{  
+    cout << "DatabaseManager::createDatabase()" << endl;
     
-    m_db = new Database();    
+    m_db = new Database(path);    
     m_db->deriveKey(password);      //fill m_key in Database
     m_db->deriveChecksum();         //fill m_checksum in Database
     
-    dbFile.open(path.c_str(), ofstream::out);
+    ofstream dbFile;
+    dbFile.open(path.c_str(), ofstream::out|ofstream::binary);
     
     if (dbFile.is_open())
     {
         dbFile << Database::HEADER << endl;
         
-        cout << "Create db#" << m_db->getChecksum() << "#" << endl;
+        //cout << "Create db#" << m_db->getChecksum() << "#" << endl;
         dbFile << m_db->getChecksum() << endl;   // hash must be computed here
         
         dbFile << Database::CAPTION << endl;
@@ -128,21 +140,22 @@ void DatabaseManager::createDatabase(const string& path, const string& password)
     }
     
     delete m_db;
+    m_db = NULL;
+    
 }
 
 void DatabaseManager::closeDatabase()
 {
     delete m_db;
     m_db = NULL;
-    m_path.clear();
 }
 
 
-void DatabaseManager::saveDatabase()
+void DatabaseManager::saveDatabase() throw(exception)
 {
     if (m_db){
         ofstream dbFile;
-        dbFile.open(m_path.c_str(), ofstream::out|ofstream::trunc);
+        dbFile.open(m_db->getPath().c_str(), ofstream::out|ofstream::trunc);
         
         if (dbFile.is_open())
         {              
@@ -255,7 +268,7 @@ void DatabaseManager::importCSV(const string& input) throw(exception)
 
 
 void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
-    cout << "Add item begining #" << m_db->getChecksum() << "#" << endl;
+//     cout << "Add item begining #" << m_db->getChecksum() << "#" << endl;
     
     if (item->group.empty()) item->group = "default"; 
     if (item->login.empty()) item->login = "none";
@@ -272,7 +285,7 @@ void DatabaseManager::addItem(Item* item) throw(invalid_argument) {
     } else {
         throw invalid_argument("Such name (" + item->name + ") already in database! Skipping.");
     }
-    cout << "Add item end #" << m_db->getChecksum() << "#" << endl;
+//     cout << "Add item end #" << m_db->getChecksum() << "#" << endl;
 }
 
 void DatabaseManager::removeItem(const string& name) throw(invalid_argument)
@@ -310,7 +323,7 @@ void DatabaseManager::editItem(Item * item) throw(invalid_argument)
 
 void DatabaseManager::printItemsByName(const string& name) const
 {
-    cout << "Database " << m_path << ":" << endl;
+    cout << "Database " << m_db->getPath() << ":" << endl;
     cout.setf(ios::left);
     cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
@@ -336,7 +349,7 @@ void DatabaseManager::printItemsByName(const string& name) const
 
 void DatabaseManager::printItemsByGroup(const string& group) const
 {
-    cout << "Database " << m_path << ":" << endl;
+    cout << "Database " << m_db->getPath() << ":" << endl;
     cout.setf(ios::left);
     cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
@@ -362,7 +375,7 @@ void DatabaseManager::printItemsByGroup(const string& group) const
 
 void DatabaseManager::printItemByName(const string& name) const
 {
-    cout << "Database " << m_path << ":" << endl;
+    cout << "Database " << m_db->getPath() << ":" << endl;
     cout.setf(ios::left);
     cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
@@ -387,7 +400,7 @@ void DatabaseManager::printItemByName(const string& name) const
 
 void DatabaseManager::printAllItems() const
 {
-    cout << "Database " << m_path << ":" << endl;
+    cout << "Database " << m_db->getPath() << ":" << endl;
     cout.setf(ios::left);
     cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;
@@ -412,7 +425,7 @@ void DatabaseManager::printAllItems() const
 
 void DatabaseManager::printAllItemsWithSecrets() const
 {
-    cout << "Database " << m_path << ":" << endl;
+    cout << "Database " << m_db->getPath() << ":" << endl;
     cout.setf(ios::left);
     cout.width(COL_WIDTH);
     cout << "NAME" << "(GROUP)" << endl;

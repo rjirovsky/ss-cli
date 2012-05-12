@@ -24,23 +24,18 @@
 #include <sstream>
 #include <fcntl.h>
 
-
-
-
-
 const string Database::HEADER = "SAFE_STORAGE";
 const string Database::CAPTION = "group;name;login;password;";
 
 bool compare(Item* first, Item* second);
 
-Database::Database()
+Database::Database(string path):m_path(path)
 {
-    mlock(&m_key, CryptoPP::CIPHER::DEFAULT_KEYLENGTH);
+    mlock(&m_key, CryptoPP::CIPHER::MAX_KEYLENGTH);
     mlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);
     
-    ///temp key
-    ///::memset( m_key, 0x01, CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
-    ::memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE ); 
+    memset( m_key, '\0', CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
+    memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE ); 
 }
 
 Item* Database::getItemByName(const string& name)
@@ -121,36 +116,65 @@ string Database::decrypt(string cypherText)
         std::cerr << "Decryption error: " << e.what() << std::endl;
     }
     
-    cout << endl << "Decrypted key: " << recoveredText << endl;
+//     cout << endl << "Decrypted key: " <<endl;
+//     cout << recoveredText << endl;
     return recoveredText;
 }
 
-void Database::deriveKey(string password)
+void Database::deriveKey(const string& password)
 {
-    string open = string(password,0,password.length()-2); ///?????????????
-    cout << endl << "Opened key: >" << password.data() << "<" << endl;
-    cout << endl << "Used key: >" << open.data() << "<" << endl;
-    CryptoPP::SHA256 hash;
-    hash.Update((unsigned char*) open.c_str(), open.length());
-//     hash.Update(pbData2, nData2Len);
-//     hash.Update(pbData3, nData3Len);
-    hash.Final(m_key);
+    cout << "Database::deriveKey()" << endl;
+
+//     cout << SHA256("ahoj") << endl;
+//     cout << SHA256("ahoj") << endl;
+//     cout << SHA256("ahoj") << endl;
+//     
+
+//     CryptoPP::SHA256 hash;
+//     hash.CalculateDigest(m_key, (unsigned char*) password.c_str(), password.length());
+//     cout << m_key << endl;
+//     cout << m_key << endl;
+//     cout << m_key << endl;
     
+/*  
+    cout << SHA256(password) << endl;
+    cout << SHA256(password) << endl;
+    cout << SHA256(password) << endl;*/
     
-       ///blocksize 128b
- 
-    cout << endl << "Derived key: " << m_key << endl;
+    string passHash = SHA256(password);
+    copy(passHash.begin(),passHash.end(),m_key);    // string to byte *
+//     cout << m_key << endl;
+//      cout << "Derived key: >" << hex << (int*) m_key << "<" << endl;
 }
+
+string Database::SHA256(string in)
+{
+    in = "heslo";
+    byte buff[SHA1::DIGESTSIZE];
+    memset(&buff,'\0',SHA1::DIGESTSIZE);
+    CryptoPP::SHA1 hash;
+    hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length()-1);
+    
+    cout << "SHA1 result native: >" << buff << "<" << endl;
+    cout << "SHA1 result string: >" << string((char*) buff) << "<" << endl;
+    
+    return string((char*) buff);
+}
+
 
 bool Database::checkPassword()
 {
-    //cout << decrypt(m_checksum) << endl << m_key << endl;
-    return !(decrypt(m_checksum).compare(string((char*) m_key)));
+
+    cout << "Decrypted key >" << decrypt(m_checksum) << "<" << endl;
+
+    cout << "Checked   key >" << string((char*) m_key) << "<" << endl;
+    return decrypt(m_checksum) == string((char*) m_key);
 }
 
 void Database::deriveChecksum()
 {
     m_checksum = encrypt( string((char*) m_key) );
+//     cout << "Derived checksum >" << hex << (int*) m_checksum.c_str() << "<" << endl;
 }
 
 
@@ -161,7 +185,7 @@ Database::~Database()
     }
     items.clear();
     
-    munlock(&m_key, CryptoPP::CIPHER::DEFAULT_KEYLENGTH);
+    munlock(&m_key, CryptoPP::CIPHER::MAX_KEYLENGTH);
     munlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);
     
 }
