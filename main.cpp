@@ -1,7 +1,7 @@
 /** @file main.cpp
  * 
  *  @author Radek Jirovsky
- *  @version 0.1
+ *  @version 1.01
  * 
  *  Save storage for credentials (login and password)
  * 
@@ -46,8 +46,8 @@ int main(int argc, char **argv)
 {
     DatabaseManager dbm;
     
+    ///start parsing args
     if(argc == 3){
-        //cout << "#3" << endl;
         if(string(argv[1]) == "-f"){            ///set active database
             try {
                 dbm.loadDatabase(argv[2],getKey());
@@ -66,7 +66,6 @@ int main(int argc, char **argv)
             }
         } 
     } else if (argc == 4){
-        //cout << "#4" << endl;
         if(string(argv[3]) == "-L"){            ///print all with secrets
             try {
                 dbm.loadDatabase(argv[2],getKey());
@@ -181,10 +180,9 @@ Item* fillItem(string name){
     cout << "Group [default]: ";
     getline(cin,item->group);
 
-    //cout << endl;
     cout << "Login [none]: ";
     getline(cin,item->login);
-    //cout << endl;
+
     item->password = getNewKey();
     
     return item;

@@ -1,5 +1,4 @@
 /*
-    <one line to give the program's name and a brief idea of what it does.>
     Copyright (C) 2012  Radek Jirovský <email>
 
     This program is free software; you can redistribute it and/or modify
@@ -18,10 +17,10 @@
 */
 
 #include "database.h"
+
 #include <string>
 #include <list>
 #include <stdexcept>
-
 
 #ifndef DATABASEMANAGER_H
 #define DATABASEMANAGER_H
@@ -146,15 +145,18 @@ public:
     void printItemByName(const string& name) const;    
     
     /**
-     * Prints name and group for each Item in db.
+     * @brief   Prints name and group for each Item in db.
      */
     void printAllItems() const;
     
     /**
-     * Carefull! Same as printAllItems(), but prints readable login and password.
+     * @brief   Carefull! Same as printAllItems(), but prints readable login and password.
      */
     void printAllItemsWithSecrets() const;
 
+    /**
+     * @brief   Sort database content.
+     */
     void sortDatabase();
 
     virtual ~DatabaseManager();

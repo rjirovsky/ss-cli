@@ -1,5 +1,4 @@
 /*
-    <one line to give the program's name and a brief idea of what it does.>
     Copyright (C) 2012  Radek Jirovský <email>
 
     This program is free software; you can redistribute it and/or modify
@@ -30,13 +29,14 @@
 
 #define CIPHER AES
 #define CIPHER_MODE CBC_Mode
+#define HASH SHA1
 
 
 #ifndef DATABASE_H
 #define DATABASE_H
 
 using namespace std;
-using namespace CryptoPP;
+// using namespace CryptoPP;
 
 /**
  * @brief Stricture for saving user input.
@@ -138,22 +138,38 @@ public:
      */
     string decrypt(string& str);
     
+    /**
+     * @brief   Derive key from user password.
+     * It uses hash function in HASH constant.
+     * 
+     * @param   password    user defined password
+     */
     void deriveKey(const string& password);
     
+    /**
+     * @brief   Derive control hash for password check.
+     * It uses hash function in HASH constant.
+     */
     void deriveChecksum();
     
+    /**
+     * @brief   Check if password is correct.
+     */
     bool checkPassword();
     
     string getChecksum(){return m_checksum;}
     void setChecksum(string checksum){m_checksum = checksum;}
     
-    string SHA1(string in);
+//     string hash(string in);
     
     /**
      * @brief   Free all alocated memory.
      */
     virtual ~Database();
     
+    /**
+     * @brief Sort database content alphabeticaly.  
+     */
     void sortDatabase();
     
     
@@ -166,7 +182,5 @@ private:
     string m_checksum;                                  ///control hash from file
     string m_path;                                      ///path to database file
 };
-
-
 
 #endif // DATABASE_H

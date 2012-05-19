@@ -1,5 +1,5 @@
 /*
-    <one line to give the program's name and a brief idea of what it does.>
+    Database
     Copyright (C) 2012  Radek Jirovský <email>
 
     This program is free software; you can redistribute it and/or modify
@@ -117,7 +117,7 @@ string Database::decrypt(string& cypherText)
 void Database::deriveKey(const string& password)
 {
 
-    CryptoPP::SHA1 hash;
+    CryptoPP::HASH hash;
     for (int i=1;i <=1000000;i++){      ///increase derivation time
         hash.Update((unsigned char*) password.c_str(), password.length());
     }
@@ -125,15 +125,14 @@ void Database::deriveKey(const string& password)
 
 }
 
-string Database::SHA1(string in)
-{
-    byte buff[SHA1::DIGESTSIZE];
-//     memset(&buff,'\0',SHA1::DIGESTSIZE);
-    CryptoPP::SHA1 hash;
-    hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length());
-    
-    return string((char*) buff);
-}
+// string Database::hash(string in)
+// {
+//     byte buff[HASH::DIGESTSIZE];
+//     CryptoPP::HASH hash;
+//     hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length());
+//     
+//     return string((char*) buff);
+// }
 
 bool Database::checkPassword()
 {
@@ -157,6 +156,7 @@ Database::~Database()
     munlock(&m_key, CryptoPP::CIPHER::MAX_KEYLENGTH);
     munlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);    
 }
+
 
 /**
  * @brief Overloaded operator << for printing Item without secrets.
