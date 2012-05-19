@@ -29,7 +29,7 @@
 
 #define CIPHER AES
 #define CIPHER_MODE CBC_Mode
-#define HASH SHA1
+#define HASH SHA224
 
 
 #ifndef DATABASE_H
@@ -49,8 +49,8 @@ struct Item {
      * It is locked whole page.
      */
     Item(){
-        this->password.reserve(128);
-        this->login.reserve(128);
+//         this->password.reserve(128);
+//         this->login.reserve(128);
         if(mlock(this, sizeof(*this))){  //min. 2*32B characters + 2*128B cypher of pass and login
             perror("Unable to lock Item in memory!");
         }
@@ -157,10 +157,10 @@ public:
      */
     bool checkPassword();
     
-    string getChecksum(){return m_checksum;}
-    void setChecksum(string checksum){m_checksum = checksum;}
+    byte* getChecksum(){return m_checksum;}
+    void setChecksum(byte* checksum){memcpy(m_checksum,checksum, CryptoPP::HASH::DIGESTSIZE);}
     
-//     string hash(string in);
+    byte* computeHash(string in);
     
     /**
      * @brief   Free all alocated memory.
@@ -179,7 +179,7 @@ private:
     list<Item*> items;                                  ///list of Items from database file
     byte m_key[CryptoPP::CIPHER::MAX_KEYLENGTH];        ///key for symetric cypher 256b
     byte iv[ CryptoPP::CIPHER::BLOCKSIZE ];             ///inicialization vector
-    string m_checksum;                                  ///control hash from file
+    byte m_checksum[CryptoPP::HASH::DIGESTSIZE];                                  ///control hash from file
     string m_path;                                      ///path to database file
 };
 

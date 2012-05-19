@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <fcntl.h>
+//#include <openssl/rand.h>
 
 const string Database::HEADER = "SAFE_STORAGE";
 const string Database::CAPTION = "group;name;login;password;";
@@ -34,7 +35,9 @@ Database::Database(string path):m_path(path)
     mlock(&m_key, CryptoPP::CIPHER::MAX_KEYLENGTH);
     mlock(&iv, CryptoPP::CIPHER::BLOCKSIZE);
     
-    memset( m_key, '\0', CryptoPP::CIPHER::MAX_KEYLENGTH ); ///AES-256
+    memset( m_key, '\0', CryptoPP::CIPHER::MAX_KEYLENGTH );
+    
+    //RAND_bytes(iv,CryptoPP::CIPHER::BLOCKSIZE );  //TO-DO:generate iv and store to file
     memset( iv, 0x01, CryptoPP::CIPHER::BLOCKSIZE ); 
 }
 
@@ -122,27 +125,39 @@ void Database::deriveKey(const string& password)
         hash.Update((unsigned char*) password.c_str(), password.length());
     }
     hash.Final(m_key);
-
+//     cout << "key:" << m_key << endl;
 }
 
-// string Database::hash(string in)
-// {
-//     byte buff[HASH::DIGESTSIZE];
-//     CryptoPP::HASH hash;
-//     hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length());
-//     
-//     return string((char*) buff);
-// }
+byte* Database::computeHash(string in)
+{
+    byte * buff = new byte[CryptoPP::HASH::DIGESTSIZE];
+    CryptoPP::HASH hash;
+    hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length());
+//     cout << buff << endl;
+    return buff;
+}
 
 bool Database::checkPassword()
 {
-    return decrypt(m_checksum) == string((char*) m_key);
+
+    string keyStr = string((char*) m_key);
+    byte * sum = computeHash(encrypt(keyStr));
+
+    bool result = !memcmp(m_checksum, sum, CryptoPP::HASH::DIGESTSIZE);
+//     cout << "user:" << sum << endl;
+//     cout << "file:" <<  m_checksum << endl;
+
+    delete [] sum;
+    return result;
 }
 
 void Database::deriveChecksum()
 {
     string keyStr = string((char*) m_key);
-    m_checksum = encrypt( keyStr );
+    byte * sum = computeHash(encrypt(keyStr));
+    memcpy(m_checksum, sum, CryptoPP::HASH::DIGESTSIZE);
+    //cout << m_checksum << endl;
+    delete [] sum;
 }
 
 

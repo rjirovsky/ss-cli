@@ -288,7 +288,7 @@ void helpMessage(){
     cout << "      -e NAME - edit existing entry" << endl;
     cout << "      -l NAME - show complete entry with NAME (with secrets)" << endl;
     cout << "      -sn KEYWORD - search for entries containing KEYWORD in name" << endl;
-    cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl << endl;
+    cout << "      -sg KEYWORD - search for entries containing KEYWORD in group" << endl;
     cout << "      -E FILE_NAME - export database to CSV file" << endl;
     cout << "      -I FILE_NAME - import entries from CSV with header: group;name;login;password;" << endl;
     

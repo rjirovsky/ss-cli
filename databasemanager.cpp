@@ -29,7 +29,6 @@ using namespace std;
 
 DatabaseManager::DatabaseManager()
 {
-
 }
 
 void DatabaseManager::loadDatabase(const string& path, const string& password) throw(exception)
@@ -53,8 +52,11 @@ void DatabaseManager::loadDatabase(const string& path, const string& password) t
         }
         if (dbFile.good()){
             getline (dbFile,in);
-            
-            m_db->setChecksum(in);
+            byte * checkSum = new byte[CryptoPP::HASH::DIGESTSIZE];
+            copy(in.begin(), in.end(), checkSum);
+            m_db->setChecksum(checkSum);
+            delete [] checkSum;
+            //cout << m_db->getChecksum() << endl;
             if( !(m_db->checkPassword())){      ///verify password
                     throw runtime_error("Wrong password!");
             }
@@ -107,8 +109,8 @@ void DatabaseManager::createDatabase(const string& path, const string& password)
     if (dbFile.is_open())
     {
         dbFile << Database::HEADER << endl;
-        
-        dbFile << m_db->getChecksum() << endl;   // hash must be computed here
+
+        dbFile << m_db->getChecksum() << endl;
         
         dbFile << Database::CAPTION << endl;
         
