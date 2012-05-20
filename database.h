@@ -30,6 +30,7 @@
 #define CIPHER AES
 #define CIPHER_MODE CBC_Mode
 #define HASH SHA224
+#define DERIVE_CYCLES 1000000 
 
 
 #ifndef DATABASE_H

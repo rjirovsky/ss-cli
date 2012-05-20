@@ -57,12 +57,14 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if (string(argv[1]) == "-n"){    ///new database file
             try {
                 dbm.createDatabase(argv[2],getNewKey());
             } catch (exception& ex){
                 cerr << "Error creating database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } 
     } else if (argc == 4){
@@ -73,6 +75,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else {
             helpMessage();
@@ -85,6 +88,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-sg"){    ///search by group
             try {
@@ -93,6 +97,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-l"){     ///print by name
             try {
@@ -101,6 +106,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error loading database: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
             
         } else if(string(argv[3]) == "-E"){     ///export
@@ -110,6 +116,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Export error: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-I"){     ///import
             try {
@@ -120,6 +127,7 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Import error: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-rm"){    ///remove item
             try {
@@ -130,31 +138,41 @@ int main(int argc, char **argv)
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error removing entry: " << ex.what() << endl;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-a"){     /// add item
+            Item* item;
             try {
                 dbm.loadDatabase(argv[2],getKey());
-                Item* item = fillItem(argv[4]);
-                dbm.addItem(item);
+                item = fillItem(argv[4]);
+                dbm.addItem(item);          
                 dbm.sortDatabase();
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
                 cerr << "Error inserting entry: " << ex.what() << endl;
+                delete item;
+                item = NULL;
+                dbm.closeDatabase();
             }
         } else if(string(argv[3]) == "-e"){     /// edit item
+            Item* item;
             try {
                 dbm.loadDatabase(argv[2],getKey());
-                
-                Item* item = fillItem(argv[4]);
+         
+                item = fillItem(argv[4]);
                 dbm.editItem(item);
                 
                 delete item;    // entries are copied, item addr is not used
+                item = NULL;
                 dbm.sortDatabase();
                 dbm.saveDatabase();
                 dbm.closeDatabase();
             } catch (exception& ex){
-                cerr << "Error inserting entry: " << ex.what() << endl;
+                cerr << "Error editing entry: " << ex.what() << endl;
+                delete item;
+                item = NULL;
+                dbm.closeDatabase();
             }
         } else {
             helpMessage();

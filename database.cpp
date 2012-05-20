@@ -28,6 +28,7 @@
 const string Database::HEADER = "SAFE_STORAGE";
 const string Database::CAPTION = "group;name;login;password;";
 
+
 bool compare(Item* first, Item* second);
 
 Database::Database(string path):m_path(path)
@@ -121,11 +122,10 @@ void Database::deriveKey(const string& password)
 {
 
     CryptoPP::HASH hash;
-    for (int i=1;i <=1000000;i++){      ///increase derivation time
+    for (int i=1;i <= DERIVE_CYCLES;i++){      ///increase derivation time
         hash.Update((unsigned char*) password.c_str(), password.length());
     }
     hash.Final(m_key);
-//     cout << "key:" << m_key << endl;
 }
 
 byte* Database::computeHash(string in)
@@ -133,7 +133,7 @@ byte* Database::computeHash(string in)
     byte * buff = new byte[CryptoPP::HASH::DIGESTSIZE];
     CryptoPP::HASH hash;
     hash.CalculateDigest(buff, (unsigned char*) in.c_str(), in.length());
-//     cout << buff << endl;
+
     return buff;
 }
 
@@ -144,8 +144,7 @@ bool Database::checkPassword()
     byte * sum = computeHash(encrypt(keyStr));
 
     bool result = !memcmp(m_checksum, sum, CryptoPP::HASH::DIGESTSIZE);
-//     cout << "user:" << sum << endl;
-//     cout << "file:" <<  m_checksum << endl;
+
 
     delete [] sum;
     return result;
@@ -156,7 +155,6 @@ void Database::deriveChecksum()
     string keyStr = string((char*) m_key);
     byte * sum = computeHash(encrypt(keyStr));
     memcpy(m_checksum, sum, CryptoPP::HASH::DIGESTSIZE);
-    //cout << m_checksum << endl;
     delete [] sum;
 }
 
