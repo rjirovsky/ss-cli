@@ -252,7 +252,7 @@ string getKey() {
 }
 
 /**
- * @brief   Get new password frim user.
+ * @brief   Get new password from user.
  * 
  * @return  password
  */
